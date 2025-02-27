@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineMail, AiOutlineLock } from "react-icons/ai";
 import { FaArrowRight } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -49,9 +50,9 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleEmailLogin}>
           <input type="hidden" name="remember" defaultValue="true" />
           <div className="rounded-md shadow-sm -space-y-px">
-            <div>
+            <div className="mb-2">
               <label htmlFor="email-address" className="sr-only">
-                Email address
+                Email address or phone
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -138,12 +139,13 @@ const Login = () => {
             >
               Sign in to Fashion Shop
             </button>
-            <button
+            <Link
+              to={"/register"}
               type="button"
               className="w-full mt-2 bg-slate-500 text-white py-2 rounded-lg font-semibold hover:bg-slate-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
             >
               Go to Sign up <FaArrowRight />
-            </button>
+            </Link>
           </div>
         </form>
 

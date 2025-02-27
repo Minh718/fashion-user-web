@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineMail } from "react-icons/ai";
 import { FaPhone, FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const SignupForm = () => {
   const [isEmail, setIsEmail] = useState(true);
@@ -269,12 +270,13 @@ const SignupForm = () => {
             Sign Up
           </button>
 
-          <button
+          <Link
+            to={"/login"}
             type="button"
             className="w-full mt-2 bg-slate-500 text-white py-2 rounded-lg font-semibold hover:bg-slate-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
           >
             Go to Sign up <FaArrowRight />
-          </button>
+          </Link>
         </form>
       </div>
     </div>

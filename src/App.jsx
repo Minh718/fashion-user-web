@@ -6,6 +6,8 @@ import ProductDetailPage from "./pages/detailProduct/index.tsx";
 import Login from "./pages/login/index.tsx";
 import Products from "./pages/productsSubcategory/index.tsx";
 import SignupForm from "./pages/register/index.tsx";
+import OrderHistory from "./pages/order/OrderHistory.tsx";
+import DetailOrderPage from "./pages/detailOrder/index.tsx";
 function App() {
 
   const router = createBrowserRouter([
@@ -20,6 +22,14 @@ function App() {
           element: <HomePage />,
         },
         {
+          path: "/order/:id",
+          element: <DetailOrderPage />,
+        }, 
+        {
+          path: "/orders",
+          element: <OrderHistory />,
+        }, 
+        {
           path: "/products/:thump",
           element: <Products />,
         },
@@ -32,7 +42,7 @@ function App() {
           element: <SignupForm />,
         },
         {
-          path: "/detail/:id",
+          path: "/product/:id",
           element: <ProductDetailPage />,
         },
       ]

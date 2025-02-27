@@ -8,6 +8,7 @@ import {
   FaSun,
 } from "react-icons/fa";
 import Pagination from "./Pagination";
+import { Link } from "react-router-dom";
 
 const ProductDisplay = () => {
   interface Product {
@@ -176,7 +177,7 @@ const ProductDisplay = () => {
           >
             <div className="relative">
               <img
-                src={product.image}
+                src={"https://picsum.photos/200/300"}
                 alt={product.name}
                 className="w-52 h-40 object-cover"
               />
@@ -218,12 +219,13 @@ const ProductDisplay = () => {
                 >
                   <FaShoppingCart className="mr-1" /> Buy
                 </button>
-                <button
-                  onClick={() => handleViewDetails(product)}
+                <Link
+                  to={"/product/1"}
+                  // onClick={() => handleViewDetails(product)}
                   className="bg-gray-200  text-gray-800  px-3 py-1 rounded-full hover:bg-gray-300 transition-colors duration-300 flex items-center text-sm"
                 >
                   <FaInfoCircle className="mr-1" /> Details
-                </button>
+                </Link>
               </div>
             </div>
           </div>

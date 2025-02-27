@@ -137,7 +137,7 @@ const ProductsSlide = () => {
             >
               <div className="relative">
                 <img
-                  src={product.image}
+                  src={"https://picsum.photos/200/300"}
                   alt={product.name}
                   className="w-full h-40 object-cover"
                 />

@@ -10,7 +10,7 @@ import {
   FaInfoCircle,
   FaAngleDown,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, Router } from "react-router-dom";
 
 const categories = [
   {
@@ -102,14 +102,15 @@ const Header = () => {
               )}
             </div>
             <div className="relative">
-              <div
+              <Link
+                to={"/login"}
                 className="text-2xl hover:text-blue-200 cursor-pointer flex flex-col justify-center items-center focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1"
                 aria-label="User menu"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                // onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <FaUser />
-                <span className="hidden sm:block text-sm">Hello, Minh</span>
-              </div>
+                <span className="hidden sm:block text-sm">Đăng nhập</span>
+              </Link>
               {userMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
                   <div
@@ -186,9 +187,12 @@ const Header = () => {
         <div className="container mx-auto px-4 max-w-6xl">
           <ul className="flex flex-col md:flex-row md:justify-center">
             <li className="relative group">
-              <div className="cursor-pointer flex items-end w-full md:w-auto py-3 px-4 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+              <Link
+                to={"/products/news"}
+                className="cursor-pointer flex items-end w-full md:w-auto py-3 px-4 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              >
                 <span>News</span>
-              </div>
+              </Link>
             </li>
             {categories.map((category) => (
               <li

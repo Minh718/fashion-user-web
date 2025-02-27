@@ -22,11 +22,14 @@ const Products = () => {
         name: `Product ${index + 1}`,
         price: Math.floor(Math.random() * 1000) + 1,
         brand: `Brand ${Math.floor(Math.random() * 5) + 1}`,
-        image: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1399&q=80`,
+        // image: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1399&q=80`,
+        image: "https://picsum.photos/200/300",
       }));
       setProducts(dummyProducts);
 
-      const uniqueBrands = [...new Set(dummyProducts.map((product) => product.brand))];
+      const uniqueBrands = [
+        ...new Set(dummyProducts.map((product) => product.brand)),
+      ];
       setBrands(uniqueBrands);
     };
 
@@ -160,8 +163,6 @@ const Products = () => {
         ))}
       </div> */}
       <ProductDisplay />
-
-      
     </div>
   );
 };

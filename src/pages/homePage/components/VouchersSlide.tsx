@@ -139,7 +139,7 @@ const VouchersSlide = () => {
             <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
               <div className="relative">
                 <img
-                  src={voucher.image}
+                  src={"https://picsum.photos/200/300"}
                   alt={voucher.title}
                   className="w-full h-48 object-cover"
                 />
