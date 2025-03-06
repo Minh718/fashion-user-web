@@ -1,87 +1,92 @@
 import React, { useState, useEffect } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-
+import { getUserVouchers } from "../../../services/voucherService";
+import VoucherBox from "./VoucherBox";
+import { Voucher } from "../../../types/voucher";
+const vouchers2: Voucher[] = [
+  {
+    id: 0,
+    code: "ELEC20",
+    type: "PERCENT",
+    discount: 20,
+    minPrice: 100,
+    maxDiscount: 500,
+    description: "Get amazing discounts on all electronic items",
+    startDate: "2023-09-01",
+    forNewUser: false,
+    endDate: "2023-12-31",
+    createdAt: "2023-08-15",
+    updatedAt: "2023-08-15",
+    active: true,
+    title: "20% Off on Electronics",
+    validity: "Valid till 31st Dec 2023",
+    image:
+      "https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: 1,
+    code: "BOGO",
+    type: "PERCENT",
+    discount: 50,
+    minPrice: 50,
+    maxDiscount: 200,
+    description: "Special offer on selected clothing items",
+    startDate: "2023-10-01",
+    forNewUser: false,
+    endDate: "2023-11-15",
+    createdAt: "2023-09-15",
+    updatedAt: "2023-09-15",
+    active: true,
+    title: "Buy 1 Get 1 Free",
+    validity: "Valid till 15th Nov 2023",
+    image:
+      "https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+  },
+  {
+    id: 2,
+    code: "FIRST50",
+    type: "PERCENT",
+    discount: 50,
+    minPrice: 0,
+    maxDiscount: 1000,
+    description: "Exclusive discount for new customers",
+    startDate: "2023-09-01",
+    forNewUser: true,
+    endDate: "2024-09-01",
+    createdAt: "2023-08-15",
+    updatedAt: "2023-08-15",
+    active: true,
+    title: "50% Off on First Order",
+    validity: "Valid for 30 days from registration",
+    image:
+      "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: 3,
+    code: "FIRST50",
+    type: "PERCENT",
+    discount: 50,
+    minPrice: 0,
+    maxDiscount: 1000,
+    description: "Exclusive discount for new customers",
+    startDate: "2023-09-01",
+    forNewUser: true,
+    endDate: "2024-09-01",
+    createdAt: "2023-08-15",
+    updatedAt: "2023-08-15",
+    active: true,
+    title: "50% Off on First Order",
+    validity: "Valid for 30 days from registration",
+    image:
+      "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+];
 const VouchersSlide = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [itemsPerSlide, setItemsPerSlide] = useState(1); // Track how many items are visible
-  const vouchers = [
-    {
-      id: 0,
-      code: "ELEC20",
-      type: "PERCENT",
-      discount: 20,
-      minPrice: 100,
-      maxDiscount: 500,
-      description: "Get amazing discounts on all electronic items",
-      startDate: "2023-09-01",
-      forNewUser: false,
-      endDate: "2023-12-31",
-      createdAt: "2023-08-15",
-      updatedAt: "2023-08-15",
-      active: true,
-      title: "20% Off on Electronics",
-      validity: "Valid till 31st Dec 2023",
-      image:
-        "https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    },
-    {
-      id: 1,
-      code: "BOGO",
-      type: "PERCENT",
-      discount: 50,
-      minPrice: 50,
-      maxDiscount: 200,
-      description: "Special offer on selected clothing items",
-      startDate: "2023-10-01",
-      forNewUser: false,
-      endDate: "2023-11-15",
-      createdAt: "2023-09-15",
-      updatedAt: "2023-09-15",
-      active: true,
-      title: "Buy 1 Get 1 Free",
-      validity: "Valid till 15th Nov 2023",
-      image:
-        "https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
-    },
-    {
-      id: 2,
-      code: "FIRST50",
-      type: "PERCENT",
-      discount: 50,
-      minPrice: 0,
-      maxDiscount: 1000,
-      description: "Exclusive discount for new customers",
-      startDate: "2023-09-01",
-      forNewUser: true,
-      endDate: "2024-09-01",
-      createdAt: "2023-08-15",
-      updatedAt: "2023-08-15",
-      active: true,
-      title: "50% Off on First Order",
-      validity: "Valid for 30 days from registration",
-      image:
-        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    },
-    {
-      id: 2,
-      code: "FIRST50",
-      type: "PERCENT",
-      discount: 50,
-      minPrice: 0,
-      maxDiscount: 1000,
-      description: "Exclusive discount for new customers",
-      startDate: "2023-09-01",
-      forNewUser: true,
-      endDate: "2024-09-01",
-      createdAt: "2023-08-15",
-      updatedAt: "2023-08-15",
-      active: true,
-      title: "50% Off on First Order",
-      validity: "Valid for 30 days from registration",
-      image:
-        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    },
-  ];
+  const [itemsPerSlide, setItemsPerSlide] = useState(1);
+  const [copiedCode, setCopiedCode] = React.useState(null);
+  const [vouchers, setVouchers] = React.useState<Voucher[]>(vouchers2);
+  // Track how many items are visible
 
   // Function to detect the screen size and update itemsPerSlide
   const handleResize = () => {
@@ -103,7 +108,7 @@ const VouchersSlide = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       nextSlide();
-    }, 5000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [currentIndex, itemsPerSlide]);
 
@@ -122,7 +127,12 @@ const VouchersSlide = () => {
         : prevIndex - itemsPerSlide
     );
   };
-
+  useEffect(() => {
+    (async () => {
+      const res: Voucher[] = await getUserVouchers({ page: 0, size: 3 });
+      setVouchers(vouchers2);
+    })();
+  }, []);
   return (
     <div className="relative w-full max-w-6xl mx-auto overflow-hidden">
       <div
@@ -131,40 +141,13 @@ const VouchersSlide = () => {
           transform: `translateX(-${(currentIndex / itemsPerSlide) * 100}%)`,
         }}
       >
-        {vouchers.map((voucher) => (
-          <div
+        {vouchers.map((voucher: Voucher) => (
+          <VoucherBox
             key={voucher.id}
-            className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-4 py-8 md:px-8"
-          >
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-              <div className="relative">
-                <img
-                  src={"https://picsum.photos/200/300"}
-                  alt={voucher.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-0 right-0 bg-yellow-400 text-gray-800 font-bold py-1 px-3 rounded-bl-lg">
-                  Voucher
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">{voucher.title}</h3>
-                <p className="text-gray-600 mb-4">{voucher.description}</p>
-                <p className="text-sm text-gray-500 mb-4">{voucher.validity}</p>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-lg font-semibold text-blue-600">
-                    {voucher.code}
-                  </span>
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300">
-                    Copy Code
-                  </button>
-                </div>
-                <button className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors duration-300">
-                  Redeem Now
-                </button>
-              </div>
-            </div>
-          </div>
+            voucher={voucher}
+            copiedCode={copiedCode}
+            setCopiedCode={setCopiedCode}
+          />
         ))}
       </div>
       <button
