@@ -8,6 +8,10 @@ import Products from "./pages/productsSubcategory/index.tsx";
 import SignupForm from "./pages/register/index.tsx";
 import OrderHistory from "./pages/order/OrderHistory.tsx";
 import DetailOrderPage from "./pages/detailOrder/index.tsx";
+import ProductsCart from "./pages/cart/index.tsx";
+import PaymentSuccessPage from "./pages/paymentSuccess/index.tsx";
+import PaymentFailPage from "./pages/paymentFail/index.tsx";
+import NotFoundPage from "./pages/404/index.tsx";
 function App() {
 
   const router = createBrowserRouter([
@@ -45,6 +49,22 @@ function App() {
           path: "/product/:id",
           element: <ProductDetailPage />,
         },
+        {
+          path: "/cart",
+          element: <ProductsCart />,
+        },
+        {
+          path: "/payment/success",
+          element: <PaymentSuccessPage />,
+        },
+        {
+          path: "/payment/fail",
+          element: <PaymentFailPage />,
+        },
+        {
+          path: "/*",
+          element: <NotFoundPage />,
+        }
       ]
     }]);
   return (
