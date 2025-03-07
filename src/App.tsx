@@ -21,6 +21,8 @@ import { initializeUser } from "./store/user/userSlice.js";
 import React from "react";
 import Loading from "./components/Loading.tsx";
 import { getListProductsForHomePage } from "./services/productService.tsx";
+import Authenticate from "./pages/authenticate/index.tsx";
+import { AppDispatch, RootState } from "./store/index.tsx";
 interface PrivateRouteProps {
   children: ReactNode;
 }
@@ -35,12 +37,19 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 function App() {
-  // const dispatch = useDispatch();
-  // const { isAuthenticated, loading } = useSelector((state) => state.user);
-  // useEffect(() => {
-  //   dispatch(initializeUser());
-  // }, [dispatch]);
+  const dispatch = useDispatch<AppDispatch>();
+  const { isAuthenticated, loading } = useSelector(
+    (state: RootState) => state.user
+  );
+  useEffect(() => {
+    dispatch(initializeUser());
+  }, [dispatch]);
   const router = createBrowserRouter([
+    {
+      path: "/authenticate",
+      element: <Authenticate />,
+      // loader: teamLoader,
+    },
     {
       path: "/",
       element: <Home />,
@@ -57,7 +66,11 @@ function App() {
         },
         {
           path: "/orders",
-          element: <OrderHistory />,
+          element: (
+            <PrivateRoute>
+              <OrderHistory />,
+            </PrivateRoute>
+          ),
         },
         {
           path: "/products/:thump",

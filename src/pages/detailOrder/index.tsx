@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaShippingFast,
   FaCalendarAlt,
@@ -11,6 +11,12 @@ import { SiVisa, SiMastercard } from "react-icons/si";
 import { GiCash } from "react-icons/gi";
 import { BsBank } from "react-icons/bs";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import { shippingStatus } from "../../enum/shippingStatus";
+import ProgressIndicator from "./component/ProgressIndicator";
+import { paymentMethod } from "../../enum/paymentMethod";
+import { TypeVoucher } from "../../enum/TypeVoucher";
+import { useNavigate, useParams } from "react-router-dom";
+import { getDetailOrder } from "../../services/orderService";
 const links = [
   {
     name: "Home",
@@ -27,22 +33,24 @@ const links = [
 ];
 const DetailOrderPage = () => {
   const [order, setOrder] = useState({
-    totalPrice: 299.99,
+    totalAmount: 299.99,
     orderCode: "ORD12345",
-    customerName: "John Doe",
-    address: "123 Main St, Anytown, USA 12345",
-    phoneNumber: "+1 (555) 123-4567",
+    fullName: "John Doe",
+    shippingAddress: "123 Main St, Anytown, USA 12345",
+    phone: "+1 (555) 123-4567",
     orderStatus: "Shipped",
     shippingStatus: "In Transit",
     trackingNumber: "TRK9876543210",
-    paymentMethod: "bank",
-    creationDate: "2023-05-15",
+    payment: {
+      paymentMethod: paymentMethod.bank_transfer,
+    },
+    createdAt: "2023-05-15",
     voucher: {
       code: "SUMMER20",
       discount: 20,
-      type: "percentage",
+      type: "PERCENT",
     },
-    products: [
+    orderProducts: [
       {
         id: 1,
         name: "Premium T-Shirt",
@@ -69,6 +77,8 @@ const DetailOrderPage = () => {
       },
     ],
   });
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -77,31 +87,42 @@ const DetailOrderPage = () => {
     alert(`Tracking order: ${order.trackingNumber}`);
   };
   const calculateDiscountedTotal = () => {
-    const totalPrice = order.totalPrice;
+    const totalAmount = order.totalAmount;
     if (order.voucher) {
-      if (order.voucher.type === "percentage") {
-        return totalPrice * (1 - order.voucher.discount / 100);
+      if (order.voucher.type === TypeVoucher.percent) {
+        return totalAmount * (1 - order.voucher.discount / 100);
       } else {
-        return totalPrice - order.voucher.discount;
+        return totalAmount - order.voucher.discount;
       }
     }
-    return totalPrice;
+    return totalAmount;
   };
   const renderPaymentMethodIcon = (method) => {
     switch (method) {
-      case "Credit Card":
+      case paymentMethod.cash:
         return <FaCreditCard className="text-2xl text-purple-600" />;
-      case "Cash on Delivery":
+      case paymentMethod.bank_transfer:
         return <GiCash className="text-2xl text-green-600" />;
-      case "VNPAY":
+      case paymentMethod.vnpay:
         return <SiVisa className="text-2xl text-blue-600" />;
-      case "Bank":
+      case paymentMethod.bank_transfer:
         return <BsBank className="text-2xl text-red-600" />;
       default:
         return <FaCreditCard className="text-2xl text-purple-600" />;
     }
   };
-
+  useEffect(() => {
+    (async () => {
+      // try {
+      const res = await getDetailOrder(id);
+      console.log(res);
+      setOrder(res);
+      // }
+      // catch (e) {
+      //     navigate("/404")
+      // }
+    })();
+  }, []);
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
@@ -117,14 +138,14 @@ const DetailOrderPage = () => {
                 Order Information
               </h2>
               <p className="mb-2">
-                <span className="font-medium">Customer:</span>{" "}
-                {order.customerName}
+                <span className="font-medium">Customer:</span> {order.fullName}
               </p>
               <p className="mb-2">
-                <span className="font-medium">Address:</span> {order.address}
+                <span className="font-medium">Address:</span>{" "}
+                {order.shippingAddress}
               </p>
               <p className="mb-2">
-                <span className="font-medium">Phone:</span> {order.phoneNumber}
+                <span className="font-medium">Phone:</span> {order.phone}
               </p>
             </div>
             <div>
@@ -184,7 +205,7 @@ const DetailOrderPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {order.products.map((product) => (
+                  {order.orderProducts.map((product) => (
                     <tr
                       key={product.id}
                       className="hover:bg-gray-50 transition-colors duration-200"
@@ -203,7 +224,9 @@ const DetailOrderPage = () => {
               <div className="bg-gray-50 p-4 rounded-md">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-lg font-semibold">Total Price:</span>
-                  <span className="text-lg font-bold">${order.totalPrice}</span>
+                  <span className="text-lg font-bold">
+                    ${order.totalAmount}
+                  </span>
                 </div>
                 {order.voucher && (
                   <div className="bg-green-50 border border-green-200 rounded-md p-4">
@@ -248,13 +271,13 @@ const DetailOrderPage = () => {
           <div className="flex items-center space-x-4 mb-4 sm:mb-0">
             <FaCalendarAlt className="text-2xl text-green-600" />
             <span className="text-sm font-medium text-gray-600">
-              Order Placed: {order.creationDate}
+              Order Placed: {order.createdAt}
             </span>
           </div>
           <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-            {renderPaymentMethodIcon(order.paymentMethod)}
+            {renderPaymentMethodIcon(order.payment.paymentMethod)}
             <span className="text-sm font-medium text-gray-600">
-              {order.paymentMethod}
+              {order.payment.paymentMethod}
             </span>
           </div>
           <div className="relative">
