@@ -2,64 +2,222 @@ import React, { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { RiFilter3Line } from "react-icons/ri";
 import ProductDisplay from "../../components/ProductDisplay";
-
+import Pagination from "../../components/Pagination";
+import { useLoaderData, useParams } from "react-router-dom";
+import { Metadata } from "../../types/Metadata";
+import {
+  getPublicProducts,
+  getPublicProductsBySubCategory,
+} from "../../services/productService";
+const moneyFilter = [
+  {
+    from: 0,
+    to: 200,
+  },
+  {
+    from: 200,
+    to: 400,
+  },
+  {
+    from: 400,
+    to: 600,
+  },
+  {
+    from: 600,
+    to: 800,
+  },
+  {
+    from: 1000,
+    to: 1200,
+  },
+];
+const products2 = [
+  {
+    id: 1,
+    name: "Wireless Headphones trendy accessoriess ICONDENIM",
+    price: 129.99,
+    percent: 10,
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc",
+  },
+  {
+    id: 2,
+    name: "Áo Thun Nam ICONDENIM  trendy Capybara",
+    price: 199.99,
+    percent: 15,
+    rating: 4.2,
+    image: "https://images.unsplash.com/photo-1485968579580-b6d095142e6e",
+  },
+  {
+    id: 3,
+    name: "Áo Thun Nam ICONDENIM Cotton Basic Leon",
+    price: 999.99,
+    percent: 5,
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
+  },
+  {
+    id: 4,
+    name: "Áo Thun Nam Training trendy RUNPOW LightWeight",
+    price: 699.99,
+    percent: 20,
+    rating: 4.6,
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+  },
+  {
+    id: 5,
+    name: "Áo Polo Nam ICONDENIM Basic With Logo",
+    price: 89.99,
+    percent: 25,
+    rating: 4.3,
+    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
+  },
+  {
+    id: 6,
+    name: "Quần Short Bơi Nam ICONDENIM All-Day Beach",
+    price: 349.99,
+    percent: 8,
+    rating: 4.4,
+    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
+  },
+  {
+    id: 7,
+    name: "Áo Sweatshirt Nam ICONDENIM Heroic Doberman",
+    price: 499.99,
+    percent: 12,
+    rating: 4.7,
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+  },
+  {
+    id: 8,
+    name: "Áo Thun Nam ICONDENIM Trust The Process",
+    price: 79.99,
+    percent: 18,
+    rating: 4.1,
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+  },
+  {
+    id: 15,
+    name: "Áo Polo Nam ICONDENIM Basic With Logo",
+    price: 59.99,
+    percent: 25,
+    rating: 4.3,
+    image:
+      "https://images.unsplash.com/photo-1590658165737-15a047b7c0b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80",
+  },
+  {
+    id: 55,
+    name: "Quần Short Bơi Nam ICONDENIM All-Day Beach",
+    price: 35.99,
+    percent: 8,
+    rating: 4.4,
+    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
+  },
+  {
+    id: 57,
+    name: "Áo Sweatshirt Nam ICONDENIM Heroic Doberman",
+    price: 491.99,
+    percent: 12,
+    rating: 4.7,
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+  },
+  {
+    id: 8,
+    name: "Áo Thun Nam ICONDENIM Trust The Process",
+    price: 79.39,
+    percent: 18,
+    rating: 4.1,
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+  },
+  {
+    id: 28,
+    name: "Áo Thun Nam ICONDENIM Trust The Process",
+    price: 79.99,
+    percent: 18,
+    rating: 4.1,
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+  },
+  {
+    id: 19,
+    name: "Áo Polo Nam ICONDENIM Basic With Logo",
+    price: 59.99,
+    percent: 25,
+    rating: 4.3,
+    image:
+      "https://images.unsplash.com/photo-1590658165737-15a047b7c0b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80",
+  },
+  {
+    id: 33,
+    name: "Quần Short Bơi Nam ICONDENIM All-Day Beach",
+    price: 35.99,
+    percent: 8,
+    rating: 4.4,
+    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
+  },
+];
 const Products = () => {
-  const [products, setProducts] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [priceRange, setPriceRange] = useState([0, 200]);
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [sortBy, setSortBy] = useState("name");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [brands, setBrands] = useState([]);
+  let { thump } = useParams();
+  // const { metadata: data, result } = useLoaderData() as {
+  //   metadata: Metadata;
+  //   result: any[];
+  // };
 
-  const productsPerPage = 12;
+  const [products, setProducts] = useState(products2);
+  const [metadata, setMetadata] = useState<Metadata | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [minPrice, setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
+
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [sortBy, setSortBy] = useState("createdDate");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [brands, setBrands] = useState([]);
 
   useEffect(() => {
     // Simulating API call to fetch products
-    const fetchProducts = () => {
-      const dummyProducts = Array.from({ length: 50 }, (_, index) => ({
-        id: index + 1,
-        name: `Product ${index + 1}`,
-        price: Math.floor(Math.random() * 1000) + 1,
-        brand: `Brand ${Math.floor(Math.random() * 5) + 1}`,
-        // image: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1399&q=80`,
-        image: "https://picsum.photos/200/300",
-      }));
-      setProducts(dummyProducts);
-
-      const uniqueBrands = [
-        ...new Set(dummyProducts.map((product) => product.brand)),
-      ];
-      setBrands(uniqueBrands);
+    const fetchProducts = async () => {
+      let res;
+      try {
+        if (thump === "news") {
+          res = await getPublicProducts({
+            sortBy: sortBy,
+            order: sortOrder,
+            page: currentPage,
+            minPrice,
+            maxPrice,
+            size: 20,
+          });
+        } else {
+          res = await getPublicProductsBySubCategory({
+            thump,
+            sortBy: sortBy,
+            order: sortOrder,
+            page: currentPage,
+            minPrice,
+            maxPrice,
+            size: 20,
+          });
+        }
+        setProducts(res.result);
+        setMetadata(res.metadata);
+      } catch (error) {
+        console.log(error);
+      }
     };
-
     fetchProducts();
-  }, []);
-
-  const filteredProducts = products.filter(
-    (product) =>
-      product.price >= priceRange[0] &&
-      product.price <= priceRange[1] &&
-      (selectedBrand === "" || product.brand === selectedBrand)
-  );
-
-  const sortedProducts = filteredProducts.sort((a, b) => {
-    if (sortBy === "name") {
-      return sortOrder === "asc"
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
-    } else {
-      return sortOrder === "asc" ? a.price - b.price : b.price - a.price;
-    }
-  });
-
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  }, [minPrice, maxPrice, sortBy, sortOrder, currentPage]);
 
   const handlePriceRangeChange = (e) => {
     const selectedRange = e.target.value;
-    const [min, max] = selectedRange.split("-").map(Number);
-    setPriceRange([min, max]);
+    setCurrentPage(0);
+    if (selectedRange === "all") {
+      setMinPrice(null);
+      setMaxPrice(null);
+    } else {
+      const [min, max] = selectedRange.split("-").map(Number);
+      setMinPrice(min);
+      setMaxPrice(max);
+    }
   };
 
   const handleBrandChange = (e) => {
@@ -87,9 +245,10 @@ const Products = () => {
               <div className="w-full md:w-40">
                 <select
                   className="w-full px-2 py-1 border rounded"
-                  value={`${priceRange[0]}-${priceRange[1]}`}
+                  value={minPrice === null ? "all" : `${minPrice}-${maxPrice}`}
                   onChange={handlePriceRangeChange}
                 >
+                  <option value="all">All</option>
                   <option value="0-200">$0 - $200</option>
                   <option value="200-400">$200 - $400</option>
                   <option value="400-600">$400 - $600</option>
@@ -121,8 +280,15 @@ const Products = () => {
                     const [newSortBy, newSortOrder] = e.target.value.split("-");
                     setSortBy(newSortBy);
                     setSortOrder(newSortOrder);
+                    setCurrentPage(0);
                   }}
                 >
+                  <option value="createdDate-desc">
+                    Date created (to past)
+                  </option>
+                  <option value="createdDate-asc">
+                    Date created (to future)
+                  </option>
                   <option value="name-asc">Name (A-Z)</option>
                   <option value="name-desc">Name (Z-A)</option>
                   <option value="price-asc">Price (Low to High)</option>
@@ -142,27 +308,17 @@ const Products = () => {
           </div>
         </div>
       </div>
-
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentProducts.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105"
-          >
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-              <p className="text-gray-600 mb-2">{product.brand}</p>
-              <p className="text-blue-600 font-bold">${product.price}</p>
-            </div>
-          </div>
-        ))}
-      </div> */}
-      <ProductDisplay />
+      <div className={`container mx-auto px-4 py-2 max-w-full bg-white`}>
+        <h1 className="text-4xl font-bold text-center mb-4 p-1">{thump}</h1>
+        <ProductDisplay products={products} />
+        <div className="flex justify-end items-center px-4 py-2">
+          <Pagination
+            pageCount={metadata?.totalPages ?? 6}
+            handlePageClick={({ selected }) => setCurrentPage(selected)}
+            page={currentPage}
+          />
+        </div>
+      </div>
     </div>
   );
 };

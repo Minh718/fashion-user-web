@@ -11,3 +11,18 @@ export const getListProductsForHomePage = async () => {
     return null;
   }
 };
+export const getProductDetail = async (id) => {
+  const res = await axios.get(baseURL + "/product/" + id);
+  return handleApiResponse(res).result;
+};
+export const getPublicProducts = async (data) => {
+  const res = await axios.get(baseURL + "/product/public", { params: data });
+  return handleApiResponse(res);
+};
+
+export const getPublicProductsBySubCategory = async (data) => {
+  const res = await axios.get(baseURL + "/product/public/subCategory", {
+    params: data,
+  });
+  return handleApiResponse(res);
+};
