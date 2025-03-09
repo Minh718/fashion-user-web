@@ -6,13 +6,12 @@ const userLoginByGoogle = async (authCode) => {
   const res = await axios.post(baseURL + `/auth/login/google?code=${authCode}`);
   return handleApiResponse(res).result;
 };
-const userLoginByEmail = async (data) => {
+const userLogin = async (data) => {
   try {
-    const res = await axios.post(baseURL + `/auth/login`, data);
+    const res = await axios.post(baseURL + `/auth/signin`, data);
     return handleApiResponse(res).result;
   } catch (e) {
     console.log(e);
   }
 };
-
-export { userLoginByGoogle, userLoginByEmail };
+export { userLoginByGoogle, userLogin };

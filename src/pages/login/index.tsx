@@ -1,29 +1,63 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineMail, AiOutlineLock } from "react-icons/ai";
 import { FaArrowRight } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { oAuthGoogle } from "../../constants/oAuthGoogle";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store";
+import { notifyError } from "../../components/toastNotify";
+import { isValidEmail } from "../../utils/EmailUtils";
+import { isValidPhoneNumber } from "../../utils/phoneUtils";
+import { userLogin } from "../../services/authenthicateService";
+import Cookies from "js-cookie";
+import { setUserInfo } from "../../store/user/userSlice";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
 
-  const handleEmailLogin = (e) => {
-    e.preventDefault();
-    if (!email || !password) {
-      setError("Please fill in all fields");
-      return;
+  const handleEmailLogin = async () => {
+    if (username !== "") {
+      if (isValidPhoneNumber(username) || isValidEmail(username)) {
+        if (password.length < 8) {
+          notifyError("Password must be greater than or equal to 8!!");
+        }
+        try {
+          const result = await userLogin({ username, password });
+          dispatch(setUserInfo(result));
+          Cookies.set("accessToken", result.accessToken);
+          Cookies.set("refreshToken", result.refreshToken);
+          Cookies.set("x-user-id", result.id);
+        } catch (err) {
+          notifyError("Password or username is incorrect");
+        }
+      } else {
+        notifyError("Phone or email is incorrect!!");
+      }
     }
-    // Implement email login logic here
-    console.log("Email login", { email, password });
   };
 
   const handleGoogleLogin = () => {
-    // Implement Google login logic here
-    console.log("Google login");
-  };
+    const callbackUrl = oAuthGoogle.redirectUri;
+    const authUrl = oAuthGoogle.authUri;
+    const googleClientId = oAuthGoogle.clientId;
 
+    const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
+      callbackUrl
+    )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
+    window.location.href = targetUrl;
+  };
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
   return (
     <div
       className="min-h-[80vh] flex items-center justify-center bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8"
@@ -47,7 +81,7 @@ const Login = () => {
             </a>
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleEmailLogin}>
+        <div className="mt-8 space-y-6">
           <input type="hidden" name="remember" defaultValue="true" />
           <div className="rounded-md shadow-sm -space-y-px">
             <div className="mb-2">
@@ -62,15 +96,15 @@ const Login = () => {
                   />
                 </div>
                 <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="username"
+                  name="username"
+                  type="username"
+                  autoComplete="username"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
             </div>
@@ -134,7 +168,8 @@ const Login = () => {
 
           <div>
             <button
-              type="submit"
+              type="button"
+              onClick={handleEmailLogin}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
             >
               Sign in to Fashion Shop
@@ -147,7 +182,7 @@ const Login = () => {
               Go to Sign up <FaArrowRight />
             </Link>
           </div>
-        </form>
+        </div>
 
         <div className="mt-6">
           <div className="relative">

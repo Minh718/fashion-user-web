@@ -1,7 +1,3 @@
-// export const baseURL = process.env.REACT_APP_API_URL + "/api";
+export const baseURL = import.meta.env.VITE_API_URL + "/api";
 
-// export const API_URL = process.env.REACT_APP_API_URL;
-
-export const baseURL = "http://localhost:8080" + "/api";
-
-export const API_URL = "http://localhost:8080";
+export const API_URL = import.meta.env.VITE_API_URL;
