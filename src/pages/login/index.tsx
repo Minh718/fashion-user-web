@@ -175,7 +175,7 @@ const Login = () => {
               Sign in to Fashion Shop
             </button>
             <Link
-              to={"/register"}
+              to={"/signup"}
               type="button"
               className="w-full mt-2 bg-slate-500 text-white py-2 rounded-lg font-semibold hover:bg-slate-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
             >

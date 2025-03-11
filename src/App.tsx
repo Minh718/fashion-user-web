@@ -77,11 +77,11 @@ function App() {
           element: <Products />,
         },
         {
-          path: "/login",
+          path: "/signin",
           element: <Login />,
         },
         {
-          path: "/register",
+          path: "/signup",
           element: <SignupForm />,
         },
         {

@@ -14,4 +14,34 @@ const userLogin = async (data) => {
     console.log(e);
   }
 };
-export { userLoginByGoogle, userLogin };
+const userSignupByEmail = async (data) => {
+  try {
+    const res = await axios.post(baseURL + `/auth/signin/email`, data);
+    return handleApiResponse(res).result;
+  } catch (e) {
+    console.log(e);
+  }
+};
+const userSignupByPhone = async (data) => {
+  try {
+    const res = await axios.post(baseURL + `/auth/signin/phone`, data);
+    return handleApiResponse(res).result;
+  } catch (e) {
+    console.log(e);
+  }
+};
+const getOtpForPhoneNumber = async (number) => {
+  try {
+    const res = await axios.get(baseURL + `/auth/email/getotp/${number}`);
+    return handleApiResponse(res).result;
+  } catch (e) {
+    console.log(e);
+  }
+};
+export {
+  userLoginByGoogle,
+  userLogin,
+  userSignupByEmail,
+  userSignupByPhone,
+  getOtpForPhoneNumber,
+};

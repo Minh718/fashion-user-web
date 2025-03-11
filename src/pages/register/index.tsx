@@ -1,7 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineMail } from "react-icons/ai";
 import { FaPhone, FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { isValidPhoneNumber } from "../../utils/phoneUtils";
+import { isValidEmail } from "../../utils/EmailUtils";
+import { Interface } from "readline";
+import { notifyError, notifySuccess } from "../../components/toastNotify";
+import {
+  getOtpForPhoneNumber,
+  userSignupByEmail,
+  userSignupByPhone,
+} from "../../services/authenthicateService";
+
+interface ErrorState {
+  phone?: string;
+  email?: string;
+  verificationCode?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+// const emptyError = {
+//   phone: null,
+//   email: null,
+//   verificationCode: null,
+//   password: null,
+//   confirmPassword: null,
+// } as ErrorState;
+
+function isValidOTP(otp) {
+  return /^\d{6}$/.test(otp);
+}
 
 const SignupForm = () => {
   const [isEmail, setIsEmail] = useState(true);
@@ -10,58 +39,80 @@ const SignupForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-  const [countryCode, setCountryCode] = useState("+1");
-  const [errors, setErrors] = useState({});
-  const [suggestions, setSuggestions] = useState([]);
+  const [countryCode, setCountryCode] = useState("+84");
+  const [errors, setErrors] = useState<ErrorState>({});
+  const [OtpTimeLeft, setOtpTimeLeft] = useState(0);
+  const location = useLocation();
+  const [isGetCode, setIsGetCode] = useState(false);
+  const message = location.state?.message || null;
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (OtpTimeLeft <= 0) return; // Stop countdown when time reaches 0
 
-  const emailDomains = [
-    "@gmail.com",
-    "@yahoo.com",
-    "@outlook.com",
-    "@hotmail.com",
-  ];
-  const countryCodes = ["+1", "+44", "+91", "+61", "+86"];
+    const timer = setInterval(() => {
+      setOtpTimeLeft((prev) => prev - 1);
+    }, 1000);
 
-  const validateEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
+    return () => clearInterval(timer); // Cleanup on unmount
+  }, [OtpTimeLeft]);
 
-  const validatePhone = (phone) => {
-    const regex = /^\d{10}$/;
-    return regex.test(phone);
-  };
+  const countryCodes = ["+84"];
 
   const validatePassword = (password) => {
     return password.length >= 8;
   };
 
-  useEffect(() => {
-    if (email && !email.includes("@")) {
-      setSuggestions(emailDomains.map((domain) => email + domain));
+  const handleGetCode = async () => {
+    const newErrors = {} as ErrorState;
+    if (phone.length === 0) {
+      newErrors.phone = "Phone number is required";
+    } else if (!isValidPhoneNumber(phone)) {
+      newErrors.phone = "Invalid phone number";
     } else {
-      setSuggestions([]);
+      setIsGetCode(true);
+      try {
+        // const res =
+        await getOtpForPhoneNumber(phone);
+        setOtpTimeLeft(300);
+        notifySuccess("Otp is sending to your phone!");
+        setErrors({});
+      } catch (error) {
+        setIsGetCode(false);
+        newErrors.phone = error.response.data.message;
+        setErrors({});
+      }
+      //API
+      return;
     }
-  }, [email]);
-
-  const handleGetCode = () => {
-    if (validatePhone(phone)) {
-      console.log("Sending verification code to", countryCode + phone);
+    setErrors(newErrors);
+  };
+  const changeTypeLogin = (status) => {
+    if (status !== isEmail) {
+      setIsEmail(status);
+      setErrors({});
+      setPassword("");
+      setPhone("");
+      setEmail("");
+      setConfirmPassword("");
+      setVerificationCode("");
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newErrors = {};
+    const newErrors = {} as ErrorState;
 
     if (isEmail) {
       if (!email) newErrors.email = "Email is required";
-      else if (!validateEmail(email)) newErrors.email = "Invalid email format";
+      else if (!isValidEmail(email)) newErrors.email = "Invalid email format";
     } else {
       if (!phone) newErrors.phone = "Phone number is required";
-      else if (!validatePhone(phone)) newErrors.phone = "Invalid phone number";
+      else if (!isValidPhoneNumber(phone))
+        newErrors.phone = "Invalid phone number";
       if (!verificationCode)
         newErrors.verificationCode = "Verification code is required";
+      else if (!isValidOTP(verificationCode))
+        newErrors.verificationCode = "Invalid OTP format";
     }
 
     if (!password) newErrors.password = "Password is required";
@@ -73,12 +124,39 @@ const SignupForm = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log(
-        "Form submitted:",
-        isEmail
-          ? { email, password }
-          : { phone: countryCode + phone, password, verificationCode }
-      );
+      let message;
+      if (isEmail) {
+        try {
+          const res = await userSignupByEmail({ email, password });
+        } catch (error) {
+          if (error.response.data.code === 1044) {
+            newErrors.email = error.response.data.message;
+            setErrors(newErrors);
+            return;
+          } else notifyError(error.response.data.message);
+        }
+        message = "Check email for complete register!!";
+      } else {
+        try {
+          const res = await userSignupByPhone({
+            phone,
+            password,
+            code: verificationCode,
+          });
+        } catch (error) {
+          if (error.response.data.code === 1044) {
+            newErrors.verificationCode = error.response.data.message;
+            setErrors(newErrors);
+            return;
+          } else notifyError(error.response.data.message);
+        }
+        message = "Signup successfully, go to Signin!!";
+      }
+      navigate("/signup", {
+        state: {
+          message,
+        },
+      });
     }
   };
 
@@ -91,193 +169,208 @@ const SignupForm = () => {
       }}
     >
       <div className="max-w-md w-full space-y-8 bg-white bg-opacity-90 p-10 rounded-xl shadow-2xl">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign up to Fashion Shop
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sign up to get started
-          </p>
-        </div>
-
-        <div className="flex items-center justify-center mb-8">
-          <div className="relative inline-flex">
-            <button
-              className={`px-4 py-2 rounded-l-lg transition-all duration-300 ${
-                isEmail
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-200 text-gray-700"
-              }`}
-              onClick={() => setIsEmail(true)}
-              aria-label="Switch to email signup"
-            >
-              <FaEnvelope className="inline mr-2" />
-              Email
-            </button>
-            <button
-              className={`px-4 py-2 rounded-r-lg transition-all duration-300 ${
-                !isEmail
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-200 text-gray-700"
-              }`}
-              onClick={() => setIsEmail(false)}
-              aria-label="Switch to phone signup"
-            >
-              <FaPhone className="inline mr-2" />
-              Phone
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-2">
-          {isEmail ? (
+        {message === null ? (
+          <>
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300`}
-                placeholder="Enter your email"
-              />
-              {errors.email && (
-                <p className="mt-2 text-sm text-red-600">{errors.email}</p>
-              )}
+              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Sign up to Fashion Shop
+              </h2>
+              <p className="mt-2 text-center text-sm text-gray-600">
+                Sign up to get started
+              </p>
             </div>
-          ) : (
-            <div className="space-y-2">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Phone Number
-              </label>
-              <div className="flex gap-4">
-                <select
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
-                  className="w-24 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  {countryCodes.map((code) => (
-                    <option key={code} value={code}>
-                      {code}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="tel"
-                  id="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={`flex-1 px-3 py-2 rounded-lg border ${
-                    errors.phone ? "border-red-500" : "border-gray-300"
-                  } focus:outline-none focus:ring-2 focus:ring-purple-500`}
-                  placeholder="Enter your phone number"
-                />
-              </div>
-              {errors.phone && (
-                <p className="mt-2 text-sm text-red-600">{errors.phone}</p>
-              )}
 
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  className={`flex-1 px-3 py-2 rounded-lg border ${
-                    errors.verificationCode
-                      ? "border-red-500"
-                      : "border-gray-300"
-                  } focus:outline-none focus:ring-2 focus:ring-purple-500`}
-                  placeholder="Enter verification code"
-                />
+            <div className="flex items-center justify-center mb-8">
+              <div className="relative inline-flex">
                 <button
-                  type="button"
-                  onClick={handleGetCode}
-                  className="px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors"
+                  className={`px-4 py-2 rounded-l-lg transition-all duration-300 ${
+                    isEmail
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                  onClick={() => changeTypeLogin(true)}
+                  aria-label="Switch to email signup"
                 >
-                  Get Code
+                  <FaEnvelope className="inline mr-2" />
+                  Email
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-r-lg transition-all duration-300 ${
+                    !isEmail
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                  onClick={() => changeTypeLogin(false)}
+                  aria-label="Switch to phone signup"
+                >
+                  <FaPhone className="inline mr-2" />
+                  Phone
                 </button>
               </div>
-              {errors.verificationCode && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.verificationCode}
-                </p>
-              )}
             </div>
-          )}
 
-          <div className="space-y-2">
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+            <form onSubmit={handleSubmit} className="space-y-2">
+              {isEmail ? (
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-lg border ${
+                      errors.email ? "border-red-500" : "border-gray-300"
+                    } focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300`}
+                    placeholder="Enter your email"
+                  />
+                  {errors.email && (
+                    <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Phone Number
+                  </label>
+                  <div className="flex gap-4">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="w-24 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {countryCodes.map((code) => (
+                        <option key={code} value={code}>
+                          {code}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      id="phone"
+                      disabled={isGetCode}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className={`flex-1 px-3 py-2 rounded-lg border ${
+                        errors.phone ? "border-red-500" : "border-gray-300"
+                      } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+                  {errors.phone && (
+                    <p className="mt-2 text-sm text-red-600">{errors.phone}</p>
+                  )}
+
+                  <div className="flex gap-4">
+                    <input
+                      type="text"
+                      disabled={!isGetCode}
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                      className={`flex-1 px-3 py-2 rounded-lg border ${
+                        errors.verificationCode
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                      placeholder="Enter verification code"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleGetCode}
+                      disabled={OtpTimeLeft > 0}
+                      className={`px-4 py-2 bg-slate-500 text-white rounded-lg font-bold ${
+                        OtpTimeLeft === 0 && "hover:bg-slate-600 "
+                      }transition-colors`}
+                    >
+                      {OtpTimeLeft > 0 ? OtpTimeLeft : "Get Code"}
+                    </button>
+                  </div>
+                  {errors.verificationCode && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.verificationCode}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-lg border ${
+                      errors.password ? "border-red-500" : "border-gray-300"
+                    } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                    placeholder="Enter your password"
+                  />
+                  {errors.password && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-lg border ${
+                      errors.confirmPassword
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                    placeholder="Confirm your password"
+                  />
+                  {errors.confirmPassword && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02]"
               >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-purple-500`}
-                placeholder="Enter your password"
-              />
-              {errors.password && (
-                <p className="mt-2 text-sm text-red-600">{errors.password}</p>
-              )}
-            </div>
+                Sign Up
+              </button>
 
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-2"
+              <Link
+                to={"/signin"}
+                type="button"
+                className="w-full mt-2 bg-slate-500 text-white py-2 rounded-lg font-semibold hover:bg-slate-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
               >
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-purple-500`}
-                placeholder="Confirm your password"
-              />
-              {errors.confirmPassword && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02]"
-          >
-            Sign Up
-          </button>
-
-          <Link
-            to={"/login"}
-            type="button"
-            className="w-full mt-2 bg-slate-500 text-white py-2 rounded-lg font-semibold hover:bg-slate-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
-          >
-            Go to Sign up <FaArrowRight />
-          </Link>
-        </form>
+                Go to Sign up <FaArrowRight />
+              </Link>
+            </form>
+          </>
+        ) : (
+          <h1 className="text-center font-bold text-2xl">{message}</h1>
+        )}
       </div>
     </div>
   );
