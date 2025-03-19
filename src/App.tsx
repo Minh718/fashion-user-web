@@ -22,7 +22,8 @@ import React from "react";
 import Loading from "./components/Loading.tsx";
 import { getListProductsForHomePage } from "./services/productService.tsx";
 import Authenticate from "./pages/authenticate/index.tsx";
-import { AppDispatch, RootState } from "./store/index.tsx";
+import { AppDispatch, RootState, store } from "./store/index.tsx";
+import { getAllProductOfCart } from "./services/cartService.tsx";
 interface PrivateRouteProps {
   children: ReactNode;
 }
@@ -91,6 +92,12 @@ function App() {
         {
           path: "/cart",
           element: <ProductsCart />,
+          // loader: () => {
+          //   const state = store.getState(); // Access the store directly here
+          //   const isAuthenticated = state.user.isAuthenticated;
+          //   if (isAuthenticated) return getAllProductOfCart(0);
+          //   return null;
+          // },
         },
         {
           path: "/payment/success",

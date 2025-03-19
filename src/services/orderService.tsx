@@ -19,3 +19,7 @@ export const getDetailOrder = async (id) => {
   const res = await api.get(baseURL + "/order/detail/" + id);
   return handleApiResponse(res).result;
 };
+export const saveOrder = async (data) => {
+  const res = await api.post(baseURL + "/order/save", data);
+  return handleApiResponse(res).result;
+};

@@ -1,5 +1,6 @@
 import React from "react";
 export default function ProductCart({
+  handleRemoveProduct,
   setChoosedCpss,
   choosedCpss,
   productSizeColor,
@@ -67,7 +68,12 @@ export default function ProductCart({
             <h1 className="italic text-[18px]">{product.name}</h1>
             <h1 className="text-[14px]">Size: {size.name}</h1>
           </div>
-          <button className="text-red-600 text-4xl">&times;</button>
+          <button
+            className="text-red-600 text-4xl"
+            onClick={() => handleRemoveProduct(id)}
+          >
+            &times;
+          </button>
         </div>
         <div className="flex justify-between items-end mt-2 sm:mt-0">
           <div>
