@@ -11,6 +11,10 @@ export const getListProductsForHomePage = async () => {
     return null;
   }
 };
+export const searchProducts = async (data) => {
+  const res = await axios.get(baseURL + "/product/search", { params: data });
+  return handleApiResponse(res);
+};
 export const getProductDetail = async (id) => {
   const res = await axios.get(baseURL + "/product/" + id);
   return handleApiResponse(res).result;
