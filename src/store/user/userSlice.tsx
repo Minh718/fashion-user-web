@@ -10,7 +10,7 @@ export interface UserState {
 
 const initialState: UserState = {
   userInfo: null,
-  isAuthenticated: false,
+  isAuthenticated: true,
   loading: true,
   statusCart: false,
 };

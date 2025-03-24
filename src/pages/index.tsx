@@ -4,6 +4,7 @@ import React from "react";
 import Footer from "../components/Footer";
 import ChatIcon from "../components/ChatIcon";
 import { ToastContainer } from "react-toastify";
+import ChatBox from "../components/chatbox";
 export default function Home() {
   return (
     <>
@@ -16,7 +17,7 @@ export default function Home() {
             </div>
           </div>
         </main>
-        <ChatIcon />
+        <ChatBox />
         <Footer />
       </div>
       <ToastContainer />
