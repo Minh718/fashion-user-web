@@ -3,6 +3,7 @@ import { FaCheck, FaTags } from "react-icons/fa";
 import { FaTimes } from "react-icons/fa";
 import { Voucher } from "../../../types/voucher";
 import { getAllUserVouchers } from "../../../services/voucherService";
+import { notifyError } from "../../../components/toastNotify";
 export default function DisplayVouchers({ setCurrentCode }) {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [showBackdrop, setShowBackdrop] = useState(false);
@@ -25,7 +26,7 @@ export default function DisplayVouchers({ setCurrentCode }) {
         const res = await getAllUserVouchers();
         setVouchers(res);
       } catch (error) {
-        console.log(error);
+        notifyError("Error occur");
       }
     })();
   }, []);
@@ -57,7 +58,7 @@ export default function DisplayVouchers({ setCurrentCode }) {
               onClick={handleCloseBackdrop}
               className="absolute z-10 top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-300 transform hover:rotate-90"
             >
-              <FaTimes size={"large"} />
+              <FaTimes />
             </button>
             <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-yellow-400 to-orange-500 z-0"></div>
             <img

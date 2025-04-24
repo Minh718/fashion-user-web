@@ -10,7 +10,7 @@ export interface UserState {
 
 const initialState: UserState = {
   userInfo: null,
-  isAuthenticated: true,
+  isAuthenticated: false,
   loading: true,
   statusCart: false,
 };
@@ -46,8 +46,13 @@ export const { setUserInfo, clearUserInfo, setLoading, setStatusCart } =
 
 export default userSlice.reducer;
 
-export const initializeUser = () => async (dispatch) => {
-  const user = await getMyInfo();
-  if (user === null) dispatch(setLoading(false));
-  else dispatch(setUserInfo(user));
+export const initializeUser = async (dispatch) => {
+  try {
+    const user = await getMyInfo();
+    console.log(user);
+    dispatch(user ? setUserInfo(user) : setLoading(false));
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    dispatch(setLoading(false));
+  }
 };

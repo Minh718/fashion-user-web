@@ -1,9 +1,9 @@
-import React from 'react'
-import { FaBox, FaCheckCircle, FaTruck } from 'react-icons/fa';
-import { shippingStatus } from '../../../enum/shippingStatus';
+import React from "react";
+import { FaBox, FaCheckCircle, FaTruck } from "react-icons/fa";
+import { MdOutlineCancel } from "react-icons/md";
+import { statusOrder } from "../../../enum/StatusOrder";
 
-export default function ProgressIndicator({status}) {
-    
+export default function ProgressIndicator({ status }) {
   const stages = [
     { icon: <FaBox />, label: "Pending" },
     { icon: <FaBox />, label: "Confirmed" },
@@ -12,13 +12,13 @@ export default function ProgressIndicator({status}) {
   ];
   const convertState = () => {
     switch (status) {
-      case shippingStatus.PENDING:
+      case statusOrder.pending:
         return 0;
-      case shippingStatus.CONFIRMED:
+      case statusOrder.confirmed:
         return 1;
-      case shippingStatus.SHIPPED:
+      case statusOrder.shipped:
         return 2;
-      case shippingStatus.DELIVERED:
+      case statusOrder.delivered:
         return 3;
       default:
         return -1;
@@ -26,24 +26,40 @@ export default function ProgressIndicator({status}) {
   };
   return (
     <div className="mb-8">
-    <div className="flex justify-between items-center">
-      {stages.map((stage, index) => (
-        <div key={index} className="flex flex-col items-center w-1/4">
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center ${index <= convertState() ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"}`}
-          >
-            {stage.icon}
+      <div className="flex justify-between items-center">
+        {status === statusOrder.canceled ? (
+          <div className="w-full flex justify-center items-center gap-2 font-bold text-red-700">
+            <MdOutlineCancel size={40} /> <span>Order Canceled</span>
           </div>
-          <span className="mt-2 text-sm text-center">{stage.label}</span>
+        ) : (
+          stages.map((stage, index) => (
+            <div key={index} className="flex flex-col items-center w-1/4">
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  index <= convertState()
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-500"
+                }`}
+              >
+                {stage.icon}
+              </div>
+              <span className="mt-2 text-sm text-center">{stage.label}</span>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Progress bar */}
+      {status !== statusOrder.canceled && (
+        <div className="mt-4 h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
+            style={{
+              width: `${(convertState() / (stages.length - 1)) * 100}%`,
+            }}
+          ></div>
         </div>
-      ))}
+      )}
     </div>
-    <div className="mt-4 h-2 bg-gray-200 rounded-full">
-      <div
-        className="h-full bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
-        style={{ width: `${(convertState() / (stages.length - 1)) * 100}%` }}
-      ></div>
-    </div>
-  </div>
-  )
+  );
 }

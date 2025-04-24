@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaInfoCircle, FaShoppingCart, FaStar } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { Link } from "react-router-dom";
+import { calculateDiscountedPrice } from "../../../utils/priceDiscount";
 
 const ProductsSlide = ({ products }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,7 +41,6 @@ const ProductsSlide = ({ products }) => {
         : prevIndex + itemsPerSlide
     );
   };
-
   const prevSlide = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex === 0
@@ -92,26 +93,34 @@ const ProductsSlide = ({ products }) => {
                 </div>
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-lg font-bold text-gray-900 ">
-                    {/* ${calculateDiscountedPrice(product.price, product.percent).toFixed(2)} */}
-                    500$
+                    $
+                    {calculateDiscountedPrice(
+                      product.price,
+                      product.percent
+                    ).toFixed(2)}
+                    {/* 500$ */}
                   </span>
                   <span className="text-sm text-gray-500  line-through">
                     ${product.price.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <button
-                    //   onClick={() => handleBuy(product)}
-                    className="bg-blue-600  text-white px-3 py-1 rounded-full hover:bg-blue-700 transition-colors duration-300 flex items-center text-sm"
-                  >
-                    <FaShoppingCart className="mr-1" /> Buy
-                  </button>
-                  <button
-                    //   onClick={() => handleViewDetails(product)}
-                    className="bg-gray-200  text-gray-800  px-3 py-1 rounded-full hover:bg-gray-300 transition-colors duration-300 flex items-center text-sm"
-                  >
-                    <FaInfoCircle className="mr-1" /> Details
-                  </button>
+                  <Link to={"/product/" + product.id}>
+                    <button
+                      //   onClick={() => handleBuy(product)}
+                      className="bg-blue-600  text-white px-3 py-1 rounded-full hover:bg-blue-700 transition-colors duration-300 flex items-center text-sm"
+                    >
+                      <FaShoppingCart className="mr-1" /> Buy
+                    </button>
+                  </Link>
+                  <Link to={"/product/" + product.id}>
+                    <button
+                      //   onClick={() => handleViewDetails(product)}
+                      className="bg-gray-200  text-gray-800  px-3 py-1 rounded-full hover:bg-gray-300 transition-colors duration-300 flex items-center text-sm"
+                    >
+                      <FaInfoCircle className="mr-1" /> Details
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>

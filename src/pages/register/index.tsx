@@ -133,7 +133,10 @@ const SignupForm = () => {
             newErrors.email = error.response.data.message;
             setErrors(newErrors);
             return;
-          } else notifyError(error.response.data.message);
+          } else {
+            notifyError(error.response.data.message);
+          }
+          return;
         }
         message = "Check email for complete register!!";
       } else {
@@ -147,8 +150,8 @@ const SignupForm = () => {
           if (error.response.data.code === 1044) {
             newErrors.verificationCode = error.response.data.message;
             setErrors(newErrors);
-            return;
           } else notifyError(error.response.data.message);
+          return;
         }
         message = "Signup successfully, go to Signin!!";
       }

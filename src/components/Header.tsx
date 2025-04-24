@@ -10,11 +10,13 @@ import {
   FaInfoCircle,
   FaAngleDown,
 } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, Router } from "react-router-dom";
-import { RootState } from "../store";
+import { AppDispatch, RootState } from "../store";
 import FieldSearch from "./FieldSearch";
 import { getAllCategories } from "../services/categoryService";
+import { FaLocationDot } from "react-icons/fa6";
+import { clearUserInfo } from "../store/user/userSlice";
 const categories2 = [
   {
     id: 1,
@@ -66,24 +68,27 @@ const Header = () => {
   const [hoveredCategory, setHoveredCategory] = useState<String | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [categories, setCategories] = React.useState(categories2);
+  const [categories, setCategories] = React.useState<any[]>([]);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { isAuthenticated, userInfo } = useSelector(
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { isAuthenticated, userInfo, statusCart } = useSelector(
     (state: RootState) => state.user
   );
-  const notifications = [
-    { id: 1, message: "New product arrival!" },
-    { id: 2, message: "Your order has been shipped" },
-    { id: 3, message: "Flash sale starting soon" },
-  ];
-  // useEffect(() => {
-  //   (async () => {
-  //     const data = await getAllCategories();
-  //     setCategories(data);
-  //   })();
-  // }, []);
+  const handleLogout = () => {
+    dispatch(clearUserInfo());
+  };
+  useEffect(() => {
+    (async () => {
+      const data = await getAllCategories();
+      setCategories(data);
+    })();
+  }, []);
   return (
-    <header className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+    <header
+      className="bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+      onClick={() => setUserMenuOpen(false)}
+    >
       <div className="container mx-auto px-4 py-4 max-w-6xl">
         <div className="flex items-center justify-between">
           <Link to="/">
@@ -100,39 +105,20 @@ const Header = () => {
               <div
                 className="text-2xl hover:text-blue-200 cursor-pointer flex flex-col justify-center items-center focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1"
                 aria-label="Notifications"
-                onClick={() => setNotificationOpen(!notificationOpen)}
               >
-                <FaBell />
-                <span className="hidden sm:block text-sm">Nofications</span>
+                <FaLocationDot />
+                <span className="hidden sm:block text-sm">Location</span>
               </div>
-              {notificationOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                  <div
-                    className="py-1"
-                    role="menu"
-                    aria-orientation="vertical"
-                    aria-labelledby="options-menu"
-                  >
-                    {notifications.map((notification) => (
-                      <a
-                        key={notification.id}
-                        href="#"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                        role="menuitem"
-                      >
-                        {notification.message}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
             <div className="relative">
               {isAuthenticated ? (
                 <div
                   className="text-2xl hover:text-blue-200 cursor-pointer flex flex-col justify-center items-center focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1"
                   aria-label="User menu"
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  onClick={(e) => {
+                    setUserMenuOpen(!userMenuOpen);
+                    e.stopPropagation();
+                  }}
                 >
                   <FaUser />
                   <span className="hidden sm:block text-sm">
@@ -164,15 +150,15 @@ const Header = () => {
                     >
                       <FaClipboardList className="mr-3" /> Orders
                     </Link>
-                    <a
-                      href="#"
+                    <Link
+                      to="/user"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                       role="menuitem"
                     >
                       <FaInfoCircle className="mr-3" /> User Info
-                    </a>
+                    </Link>
                     <a
-                      href="#"
+                      onClick={handleLogout}
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                       role="menuitem"
                     >
@@ -184,11 +170,14 @@ const Header = () => {
             </div>
             <Link to="/cart">
               <div
-                className="text-2xl hover:text-blue-200 cursor-pointer flex flex-col justify-center items-center focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1"
+                className="text-2xl relative  hover:text-blue-200 cursor-pointer flex flex-col justify-center items-center focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1"
                 aria-label="Shopping Cart"
               >
                 <FaShoppingCart />
                 <span className="hidden sm:block text-sm">Cart</span>
+                {statusCart && (
+                  <div className="w-[15px] h-[15px] rounded-full bg-red-600 absolute -top-0 -right-0"></div>
+                )}
               </div>
             </Link>
             <button
@@ -245,7 +234,7 @@ const Header = () => {
                 </div>
                 {hoveredCategory === category.name && (
                   <ul className="absolute left-0 w-full min-w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transition-all duration-300 ease-in-out transform opacity-100 scale-100">
-                    {category.subcategories.map((subcat) => (
+                    {category.subCategories.map((subcat) => (
                       <li key={subcat.id}>
                         <Link
                           to={"/products/" + subcat.thump}

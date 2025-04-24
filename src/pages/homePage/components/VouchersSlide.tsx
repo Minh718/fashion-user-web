@@ -3,6 +3,7 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { getUserVouchers } from "../../../services/voucherService";
 import VoucherBox from "./VoucherBox";
 import { Voucher } from "../../../types/voucher";
+import Loading from "../../../components/Loading";
 const vouchers2: Voucher[] = [
   {
     id: 0,
@@ -82,10 +83,11 @@ const vouchers2: Voucher[] = [
   },
 ];
 const VouchersSlide = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(1);
   const [copiedCode, setCopiedCode] = React.useState(null);
-  const [vouchers, setVouchers] = React.useState<Voucher[]>(vouchers2);
+  const [vouchers, setVouchers] = React.useState<Voucher[]>([]);
   // Track how many items are visible
 
   // Function to detect the screen size and update itemsPerSlide
@@ -106,11 +108,14 @@ const VouchersSlide = () => {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 10000);
+    let interval;
+    if (!isLoading) {
+      interval = setInterval(() => {
+        nextSlide();
+      }, 10000);
+    }
     return () => clearInterval(interval);
-  }, [currentIndex, itemsPerSlide]);
+  }, [currentIndex, itemsPerSlide, isLoading]);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) =>
@@ -129,19 +134,30 @@ const VouchersSlide = () => {
   };
   useEffect(() => {
     (async () => {
-      const res: Voucher[] = await getUserVouchers({ page: 0, size: 3 });
-      setVouchers(vouchers2);
+      setIsLoading(true);
+      const res: Voucher[] = await getUserVouchers({ page: 0, size: 4 });
+      setVouchers(res);
+      setIsLoading(false);
     })();
   }, []);
+  if (isLoading) {
+    return (
+      <div className="relative h-60 bg-white">
+        <Loading />
+      </div>
+    );
+  } else if (vouchers.length === 0) {
+    return <></>;
+  }
   return (
-    <div className="relative w-full max-w-6xl mx-auto overflow-hidden">
+    <div className="relative w-full  max-w-6xl mx-auto overflow-hidden">
       <div
         className="flex transition-transform duration-500 ease-in-out"
         style={{
           transform: `translateX(-${(currentIndex / itemsPerSlide) * 100}%)`,
         }}
       >
-        {vouchers.map((voucher: Voucher) => (
+        {vouchers?.map((voucher: Voucher) => (
           <VoucherBox
             key={voucher.id}
             voucher={voucher}

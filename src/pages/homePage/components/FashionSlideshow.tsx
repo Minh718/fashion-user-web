@@ -1,47 +1,22 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FaChevronLeft, FaChevronRight, FaPause, FaPlay } from "react-icons/fa";
-
+import { Slide } from "../../../types/Slide";
+import { getPublicSlides } from "../../../services/slideService";
+import Loading from "../../../components/Loading";
 const FashionSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-
-  const slides = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
-      title: "Summer Collection",
-      description: "Elegant and breezy outfits for the season",
-      price: "$129.99",
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc",
-      title: "Formal Wear",
-      description: "Sophisticated suits for any occasion",
-      price: "$249.99",
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1485968579580-b6d095142e6e",
-      title: "Casual Chic",
-      description: "Comfortable yet stylish everyday wear",
-      price: "$89.99",
-    },
-    {
-      id: 4,
-      image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
-      title: "Accessories Collection",
-      description: "Complete your look with our trendy accessories",
-      price: "$39.99",
-    },
-  ];
+  const [slides, setSlides] = useState<Slide[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
   }, [slides.length]);
 
   const prevSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide - 1 + slides.length) % slides.length);
+    setCurrentSlide(
+      (prevSlide) => (prevSlide - 1 + slides.length) % slides.length
+    );
   };
 
   const goToSlide = (index) => {
@@ -54,12 +29,26 @@ const FashionSlideshow = () => {
 
   useEffect(() => {
     let interval;
-    if (isPlaying) {
+    if (!isLoading) {
       interval = setInterval(nextSlide, 5000);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, nextSlide]);
+  }, [isLoading, nextSlide]);
 
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const res: Slide[] = await getPublicSlides();
+      setSlides(res);
+      setIsLoading(false);
+    })();
+  }, []);
+  if (isLoading)
+    return (
+      <div className="relative h-[400px] md:h-[600px] bg-white">
+        <Loading />
+      </div>
+    );
   return (
     <div className="relative w-full mx-auto overflow-hidden">
       <div className="relative h-[400px] md:h-[600px]">
@@ -76,8 +65,12 @@ const FashionSlideshow = () => {
               className="object-cover w-full h-full"
             />
             <div className="absolute bottom-0 left-0 right-0 p-6 bg-black bg-opacity-50 text-white ">
-              <h2 className="text-2xl font-bold lg:visible invisible">{slide.title}</h2>
-              <p className="text-sm lg:visible invisible">{slide.description}</p>
+              <h2 className="text-2xl font-bold lg:visible invisible">
+                {slide.title}
+              </h2>
+              <p className="text-sm lg:visible invisible">
+                {slide.description}
+              </p>
               {/* <p className="text-lg font-semibold mt-2">{slide.price}</p> */}
             </div>
           </div>

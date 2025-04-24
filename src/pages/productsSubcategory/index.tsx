@@ -9,6 +9,10 @@ import {
   getPublicProducts,
   getPublicProductsBySubCategory,
 } from "../../services/productService";
+import { Product } from "../../types/Product";
+import { notifyError } from "../../components/toastNotify";
+import LoadingBigger from "../../components/LoadingBigger";
+import Loading from "../../components/Loading";
 const moneyFilter = [
   {
     from: 0,
@@ -162,11 +166,12 @@ const Products = () => {
   //   result: any[];
   // };
 
-  const [products, setProducts] = useState(products2);
+  const [products, setProducts] = useState<Product[]>([]);
   const [metadata, setMetadata] = useState<Metadata | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [minPrice, setMinPrice] = useState(null);
   const [maxPrice, setMaxPrice] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [selectedBrand, setSelectedBrand] = useState("");
   const [sortBy, setSortBy] = useState("createdDate");
@@ -175,6 +180,7 @@ const Products = () => {
 
   useEffect(() => {
     // Simulating API call to fetch products
+    setIsLoading(true);
     const fetchProducts = async () => {
       let res;
       try {
@@ -200,12 +206,13 @@ const Products = () => {
         }
         setProducts(res.result);
         setMetadata(res.metadata);
+        setIsLoading(false);
       } catch (error) {
-        console.log(error);
+        notifyError("Error occur");
       }
     };
     fetchProducts();
-  }, [minPrice, maxPrice, sortBy, sortOrder, currentPage]);
+  }, [minPrice, maxPrice, sortBy, sortOrder, currentPage, thump]);
 
   const handlePriceRangeChange = (e) => {
     const selectedRange = e.target.value;
@@ -224,15 +231,7 @@ const Products = () => {
     setSelectedBrand(e.target.value);
   };
 
-  const handleSortChange = (newSortBy) => {
-    if (newSortBy === sortBy) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(newSortBy);
-      setSortOrder("asc");
-    }
-  };
-
+  // if (isLoading) return <LoadingBigger />;
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -308,9 +307,19 @@ const Products = () => {
           </div>
         </div>
       </div>
-      <div className={`container mx-auto px-4 py-2 max-w-full bg-white`}>
-        <h1 className="text-4xl font-bold text-center mb-4 p-1">{thump}</h1>
-        <ProductDisplay products={products} />
+      <div
+        className={`container mx-auto px-4 py-2 max-w-full bg-white min-h-[70vh]`}
+      >
+        <h1 className="text-4xl font-bold text-center mb-4 p-3">{thump}</h1>
+        <div className="min-h-[50vh] flex items-center justify-center">
+          {isLoading ? (
+            <Loading />
+          ) : products.length === 0 ? (
+            <div className="text-center">No results found</div>
+          ) : (
+            <ProductDisplay products={products} />
+          )}
+        </div>
         <div className="flex justify-end items-center px-4 py-2">
           <Pagination
             pageCount={metadata?.totalPages ?? 6}

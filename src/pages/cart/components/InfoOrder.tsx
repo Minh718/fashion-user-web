@@ -15,10 +15,10 @@ export default function InfoOrder({
   setIsContinuted,
   handleProccessingOrder,
 }) {
-  const [province, setProvince] = React.useState("");
+  const [province, setProvince] = React.useState<string | null>(null);
 
-  const [district, setDistrict] = React.useState("");
-  const [ward, setWard] = React.useState("");
+  const [district, setDistrict] = React.useState<string | null>(null);
+  const [ward, setWard] = React.useState<string | null>(null);
 
   const [provinces, setProvinces] = React.useState<Province[]>([]);
   const [districts, setDistricts] = React.useState<District[]>([]);
@@ -33,17 +33,24 @@ export default function InfoOrder({
       notifyError("FullName is required");
     } else if (phone === "") {
       notifyError("Phone is required");
-    } else if (province === null) {
-      notifyError("Province is required");
-    } else if (district === null) {
-      notifyError("District is required");
-    } else if (ward === null) {
-      notifyError("Ward is required");
+      // } else if (province === null) {
+      //   notifyError("Province is required");
+      // } else if (district === null) {
+      //   notifyError("District is required");
+      // } else if (ward === null) {
+      //   notifyError("Ward is required");
     } else if (detailAddress === "") {
       notifyError("Detail address is required");
     } else {
-      const shippingAddress =
-        detailAddress + ", " + ward + ", " + district + ", " + province;
+      const shippingAddress = "";
+      // detailAddress +
+      // ", " +
+      // wards.find((w) => w.id === ward).name +
+      // ", " +
+      // districts.find((d) => d.id === district).name +
+      // ", " +
+      // provinces.find((p) => p.id === province).name;
+
       handleProccessingOrder({
         phone,
         fullName,
@@ -61,20 +68,28 @@ export default function InfoOrder({
   const handleChangeProvince = async (event) => {
     const idProvince = event.target.value;
     setProvince(idProvince);
-    setDistrict("");
+    setDistrict(null);
     setDistricts([]);
-    setWard("");
+    setWard(null);
     setWards([]);
-    const res = await getDistricts(idProvince);
-    setDistricts(res);
+    try {
+      const res = await getDistricts(idProvince);
+      setDistricts(res);
+    } catch (err) {
+      notifyError("Error occur");
+    }
   };
   const handleChangeDistrict = async (event) => {
     const idDistrict = event.target.value;
     setDistrict(idDistrict);
-    setWard("");
+    setWard(null);
     setWards([]);
-    const res = await getWards(idDistrict);
-    setWards(res);
+    try {
+      const res = await getWards(idDistrict);
+      setWards(res);
+    } catch (err) {
+      notifyError("Error occur");
+    }
   };
   // useEffect(() => {
   //     setWards([])
@@ -116,36 +131,36 @@ export default function InfoOrder({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <select
             className="border p-2"
-            value={province}
+            value={province || undefined}
             onChange={handleChangeProvince}
           >
             <option>Choose province</option>
             {provinces.map((p) => (
-              <option key={p.id} value={p.name}>
+              <option key={p.id} value={p.id}>
                 {p.name}
               </option>
             ))}
           </select>
           <select
             className="border p-2"
-            value={district}
+            value={district || undefined}
             onChange={handleChangeDistrict}
           >
             <option>Choose district</option>
             {districts.map((d) => (
-              <option key={d.id} value={d.name}>
+              <option key={d.id} value={d.id}>
                 {d.name}
               </option>
             ))}
           </select>
           <select
             className="border p-2"
-            value={ward}
+            value={ward || undefined}
             onChange={(e) => setWard(e.target.value)}
           >
             <option>Choose ward</option>
             {wards.map((w) => (
-              <option key={w.id} value={w.name}>
+              <option key={w.id} value={w.id}>
                 {w.name}
               </option>
             ))}
@@ -176,9 +191,9 @@ export default function InfoOrder({
                 value={method.value}
                 checked={paymentMethod === method.value}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="mr-2"
+                className="mr-2 size-5"
               />
-              <label>{method.name}</label>
+              <label className="flex gap-1 items-center">{method.name}</label>
             </div>
           ))}
         </div>
@@ -192,23 +207,23 @@ export default function InfoOrder({
           <div className="flex justify-between items-center mt-2">
             <h1>Subtotal:</h1>
             <span className="font-bold">
-              {checkout.totalPrice.toLocaleString("de-DE")}đ
+              ${checkout.totalPrice.toLocaleString("de-DE")}
             </span>
           </div>
           <div className="flex justify-between items-center mt-2">
             <h1>Product Discount:</h1>
             <span className="font-bold">
-              {checkout.discount.toLocaleString("de-DE")}đ
+              ${checkout.discount.toLocaleString("de-DE")}
             </span>
           </div>
           <div className="flex justify-between items-center my-2">
             <h1>Shipping fee:</h1>
-            <span className="font-bold">0đ</span>
+            <span className="font-bold">$0</span>
           </div>
           <div className="flex justify-between items-center">
             <h1>Total Amount:</h1>
             <span className="font-bold">
-              {checkout.paymentFee.toLocaleString("de-DE")}đ
+              ${checkout.paymentFee.toLocaleString("de-DE")}
             </span>
           </div>
           <div className="flex items-center flex-col mt-5">

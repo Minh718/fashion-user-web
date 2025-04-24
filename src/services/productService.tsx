@@ -1,3 +1,4 @@
+import { notifyError } from "../components/toastNotify";
 import { baseURL } from "../constants/baseURL";
 import { handleApiResponse } from "../utils/utilApi";
 import axios from "axios";
@@ -7,7 +8,7 @@ export const getListProductsForHomePage = async () => {
     const res = await axios.get(baseURL + "/product/public/homepage");
     return handleApiResponse(res).result;
   } catch (error) {
-    console.log(error);
+    notifyError("Error occur");
     return null;
   }
 };
@@ -29,4 +30,9 @@ export const getPublicProductsBySubCategory = async (data) => {
     params: data,
   });
   return handleApiResponse(res);
+};
+
+export const getRelatedProducts = async (id) => {
+  const res = await axios.get(baseURL + "/product/related/" + id);
+  return handleApiResponse(res).result;
 };

@@ -11,19 +11,19 @@ function convertDateTimeFlexibly(pastTimeStr) {
   const diffInMinutes = now.diff(pastTime, "minutes");
 
   if (diffInYears > 0) {
-    return `${diffInYears} năm trước`;
+    return `${diffInYears} year ago`;
   } else if (diffInMonths > 0) {
-    return `${diffInMonths} tháng trước`;
+    return `${diffInMonths} month ago`;
   } else if (diffInDays > 0) {
-    return `${diffInDays} ngày trước`;
+    return `${diffInDays} day ago`;
   } else if (diffInHours > 0) {
-    return `${diffInHours} giờ trước`;
+    return `${diffInHours} hour ago`;
   } else if (diffInMinutes > 30) {
     return "nữa tiếng trước";
   } else if (diffInMinutes > 0) {
-    return `${diffInMinutes} phút trước`;
+    return `${diffInMinutes} minute ago`;
   } else {
-    return "Vừa xong";
+    return "Now";
   }
 }
 

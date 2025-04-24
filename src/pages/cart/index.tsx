@@ -7,9 +7,9 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import InputVoucher from "./components/InputVoucher";
 import DisplayVouchers from "./components/DisplayVouchers";
 import InfoOrder from "./components/InfoOrder";
-import Loading from "../../components/Loading";
+import LoadingBigger from "../../components/LoadingBigger";
 import PopupReloadPage from "../../components/PopupReloadPage";
-import { notifyError } from "../../components/toastNotify";
+import { notifyError, notifySuccess } from "../../components/toastNotify";
 import { checkoutProducts } from "../../services/checkoutService";
 import {
   getAllProductOfCart,
@@ -18,175 +18,32 @@ import {
 import { paymentMethod } from "../../enum/paymentMethod";
 import { saveOrder } from "../../services/orderService";
 import { Metadata } from "../../types/Metadata";
+import { useDispatch, useSelector } from "react-redux";
+import { setStatusCart } from "../../store/user/userSlice";
+const links = [
+  {
+    name: "Home",
+    url: "/",
+  },
+  {
+    name: "Cart",
+    url: "/cart",
+  },
+];
 export default function Cart() {
   const [isContinuted, setIsContinuted] = React.useState(false);
   const [errorPopup, setErrorPopup] = useState(false);
-  // const { result, metadata } = useLoaderData() as {
-  //   result: any;
-  //   metadata: Metadata;
-  // };
-
+  const data = (useLoaderData() as {
+    result: any;
+    metadata: Metadata;
+  }) || { result: null, metadata: null };
   const [metadata, setMetadata] = React.useState<Metadata | null>(null);
 
-  const [currentCode, setCurrentCode] = React.useState("");
+  const [currentCode, setCurrentCode] = React.useState(null);
   const [page, setPage] = React.useState(0);
-  const [cartProductSizeColors, setCartProductSizeColors] = React.useState([
-    {
-      id: 6,
-      quantity: 33,
-      updateAt: "2024-09-03T01:29:25.254147",
-      productSizeColor: {
-        id: 3,
-        quantity: 30,
-        productSize: {
-          id: 7,
-          quantity: 55,
-          size: {
-            id: 35,
-            name: "X",
-          },
-          product: {
-            id: 2,
-            name: "Azure Breeze Scarf",
-            price: 100000,
-            percent: 23,
-            image:
-              "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1399&q=80",
-            createdDate: "2024-09-01T00:17:53.974772",
-          },
-        },
-        color: {
-          id: 2,
-          name: "BBLUE",
-          color: null,
-        },
-      },
-    },
-    {
-      id: 7,
-      quantity: 3,
-      updateAt: "2024-09-03T01:29:25.254147",
-      productSizeColor: {
-        id: 3,
-        quantity: 30,
-        productSize: {
-          id: 7,
-          quantity: 55,
-          size: {
-            id: 35,
-            name: "X",
-          },
-          product: {
-            id: 2,
-            name: "Stellar Step Sneakers",
-            price: 100000,
-            percent: 23,
-            image:
-              "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1399&q=80",
-            createdDate: "2024-09-01T00:17:53.974772",
-          },
-        },
-        color: {
-          id: 2,
-          name: "BBLUE",
-          color: null,
-        },
-      },
-    },
-    {
-      id: 8,
-      quantity: 1,
-      updateAt: "2024-09-03T01:29:25.254147",
-      productSizeColor: {
-        id: 3,
-        quantity: 30,
-        productSize: {
-          id: 7,
-          quantity: 55,
-          size: {
-            id: 35,
-            name: "X",
-          },
-          product: {
-            id: 2,
-            name: "Crimson Cloud Blouse",
-            price: 100000,
-            percent: 23,
-            image:
-              "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1399&q=80",
-            createdDate: "2024-09-01T00:17:53.974772",
-          },
-        },
-        color: {
-          id: 2,
-          name: "BBLUE",
-          color: null,
-        },
-      },
-    },
-    {
-      id: 9,
-      quantity: 5,
-      updateAt: "2024-09-03T01:29:25.254147",
-      productSizeColor: {
-        id: 3,
-        quantity: 30,
-        productSize: {
-          id: 7,
-          quantity: 55,
-          size: {
-            id: 35,
-            name: "X",
-          },
-          product: {
-            id: 2,
-            name: "Velvet Vogue Hoodie",
-            price: 100000,
-            percent: 23,
-            image:
-              "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1399&q=80",
-            createdDate: "2024-09-01T00:17:53.974772",
-          },
-        },
-        color: {
-          id: 2,
-          name: "BBLUE",
-          color: null,
-        },
-      },
-    },
-    {
-      id: 6,
-      quantity: 2,
-      updateAt: "2024-09-03T01:29:25.254147",
-      productSizeColor: {
-        id: 3,
-        quantity: 30,
-        productSize: {
-          id: 7,
-          quantity: 55,
-          size: {
-            id: 35,
-            name: "X",
-          },
-          product: {
-            id: 2,
-            name: "Cherry Blossom Cardigan",
-            price: 100000,
-            percent: 23,
-            image:
-              "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1399&q=80",
-            createdDate: "2024-09-01T00:17:53.974772",
-          },
-        },
-        color: {
-          id: 2,
-          name: "BBLUE",
-          color: null,
-        },
-      },
-    },
-  ]);
+  const [cartProductSizeColors, setCartProductSizeColors] = React.useState(
+    data.result
+  );
   const [choosedCpss, setChoosedCpss] = React.useState<any[]>([]);
   const [checkout, setCheckout] = React.useState({
     totalPrice: 130,
@@ -194,6 +51,7 @@ export default function Cart() {
     discount: 0,
   });
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleAddChoosedCps = (data) => {
     const newChoosedCpss = [...choosedCpss, data];
 
@@ -230,53 +88,55 @@ export default function Cart() {
       const res = await saveOrder({
         ...data,
         checkoutRes: checkout,
-        checkoutReq: { code: currentCode, cpss: choosedCpss },
+        checkoutReq: { code: currentCode, items: choosedCpss },
       });
       if (data.paymentMethod === paymentMethod.VNPAY) {
-        window.location.href = res;
+        window.location.href = res.urlPayment;
       } else {
-        notifyError("Đặt hàng thành công");
-        navigate("/order");
+        notifySuccess("Order successfully");
+        navigate("/order-success", { state: { order: res } });
       }
     } catch (error) {
+      if (error.response.data.code === 1051) setErrorPopup(true);
       notifyError(error.response.data.message);
     }
   };
-  const links = [
-    {
-      name: "Home",
-      url: "/",
-    },
-    {
-      name: "Cart",
-      url: "/cart",
-    },
-  ];
-  const handleCheckout = async (code) => {
+
+  const handleCheckout = async () => {
     try {
-      const res = await checkoutProducts({ code, cpss: choosedCpss });
-      if (code != "") setCurrentCode(code);
+      const res = await checkoutProducts({
+        code: currentCode,
+        items: choosedCpss,
+      });
       setCheckout(res);
-      setCheckout;
     } catch (error) {
-      if (error.response.data.code === 1030) setErrorPopup(true);
-      setCurrentCode("");
+      if (error.response.data.code === 1051) setErrorPopup(true);
+      setCurrentCode(null);
       notifyError(error.response.data.message);
     }
   };
 
   React.useEffect(() => {
     if (choosedCpss.length === 0) {
-      setCheckout({
-        totalPrice: 0,
-        paymentFee: 0,
-        discount: 0,
-      });
-    } else handleCheckout(null);
-  }, [choosedCpss]);
-  // if (cartProductSizeColors === null) return <Loading />;
+      setCheckout({ totalPrice: 0, paymentFee: 0, discount: 0 });
+    } else {
+      handleCheckout();
+    }
+  }, [choosedCpss, currentCode]);
+
+  React.useEffect(() => {
+    if (data.metadata) {
+      setMetadata(data.metadata);
+      setCartProductSizeColors(data.result);
+    }
+  }, [data.metadata, data.result]); // Only depend on necessary properties to avoid unnecessary renders
+
+  React.useEffect(() => {
+    dispatch(setStatusCart(false));
+  }, []); // No changes needed here
+  if (cartProductSizeColors === null) return <LoadingBigger />;
   return (
-    <div className="container mx-auto px-4 py-8 bg-white">
+    <div className="container mx-auto px-4 min-h-[80vh] py-8 bg-white">
       <Breadcrumbs links={links} />
 
       <div className="flex justify-center">
@@ -311,7 +171,7 @@ export default function Cart() {
                 {cartProductSizeColors.length === 0 && (
                   <h1 className="text-center">
                     There are no products in the cart. Shopping{" "}
-                    <Link to="/news" className="underline italic">
+                    <Link to="/products/news" className="underline italic">
                       here
                     </Link>
                   </h1>
@@ -336,24 +196,24 @@ export default function Cart() {
                 <div className="flex justify-between items-center mt-2">
                   <h1>Subtotal:</h1>
                   <span className="font-bold">
-                    {checkout.totalPrice.toLocaleString("de-DE")}đ
+                    ${checkout.totalPrice.toLocaleString("de-DE")}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-2">
                   <h1>Product Discount:</h1>
                   <span className="font-bold">
-                    {checkout.discount.toLocaleString("de-DE")}đ
+                    ${checkout.discount.toLocaleString("de-DE")}
                   </span>
                 </div>
                 <div className="flex justify-between items-center my-2">
                   <h1>Shipping fee:</h1>
-                  <span className="font-bold">0đ</span>
+                  <span className="font-bold">$0</span>
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-between items-center">
                   <h1>Total Amount:</h1>
                   <span className="font-bold">
-                    {checkout.paymentFee.toLocaleString("de-DE")}đ
+                    ${checkout.paymentFee.toLocaleString("de-DE")}
                   </span>
                 </div>
                 <div className="flex items-center flex-col">

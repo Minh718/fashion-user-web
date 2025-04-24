@@ -4,16 +4,15 @@ import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { RootState } from "../../store";
 import React from "react";
-import { setUserInfo } from "../../store/user/userSlice";
+import { initializeUser, setUserInfo } from "../../store/user/userSlice";
 import { userLoginByGoogle } from "../../services/authenthicateService";
+import Loading from "../../components/Loading";
 export default function Authenticate() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
   const [queryParameters] = useSearchParams();
   useEffect(() => {
-    // console.log(window.location.href);
-
     // const authCodeRegex = /code=([^&]+)/;
     // const isMatch = window.location.href.match(authCodeRegex);
 
@@ -27,19 +26,26 @@ export default function Authenticate() {
           Cookies.set("refreshToken", result.refreshToken);
           Cookies.set("x-user-id", result.id);
         } catch (err) {
-          navigate("/login");
+          navigate("/signin");
         }
       })();
+    } else if (
+      queryParameters.get("accessToken") &&
+      queryParameters.get("refreshToken")
+    ) {
+      Cookies.set("accessToken", queryParameters.get("accessToken"));
+      Cookies.set("refreshToken", queryParameters.get("refreshToken"));
+      // window.location.href = "/"; // Redirect to signin page
     }
   }, []);
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/home");
+      navigate("/");
     }
   }, [isAuthenticated, navigate]);
   return (
     <div className="flex items-center justify-center h-[100vh]">
-      <p>Authenticating...</p>
+      <Loading />
     </div>
   );
 }

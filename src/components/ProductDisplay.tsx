@@ -13,11 +13,6 @@ import { Product } from "../types/Product";
 const ProductDisplay = ({ products }) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const handleBuy = (product) => {
-    console.log(`Buying ${product.name}`);
-    // Implement buy functionality here
-  };
-
   const handleViewDetails = (product) => {
     setSelectedProduct(product);
   };
@@ -76,15 +71,20 @@ const ProductDisplay = ({ products }) => {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <button
+                {/* <button
                   // onClick={() => handleBuy(product)}
-                  onClick={() => handleViewDetails(product)}
+                  // onClick={() => handleViewDetails(product)}
+                  className="bg-blue-600  text-white px-3 py-1 rounded-full hover:bg-blue-700 transition-colors duration-300 flex items-center text-sm"
+                > */}
+                <Link
+                  to={"/product/" + product.id}
                   className="bg-blue-600  text-white px-3 py-1 rounded-full hover:bg-blue-700 transition-colors duration-300 flex items-center text-sm"
                 >
                   <FaShoppingCart className="mr-1" /> Buy
-                </button>
+                </Link>
+                {/* </button> */}
                 <Link
-                  to={"/product/1"}
+                  to={"/product/" + product.id}
                   // onClick={() => handleViewDetails(product)}
                   className="bg-gray-200  text-gray-800  px-3 py-1 rounded-full hover:bg-gray-300 transition-colors duration-300 flex items-center text-sm"
                 >
@@ -95,60 +95,6 @@ const ProductDisplay = ({ products }) => {
           </div>
         ))}
       </div>
-
-      {selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white  rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4 ">{selectedProduct.name}</h2>
-            <img
-              src={selectedProduct.image}
-              alt={selectedProduct.name}
-              className="w-full h-64 object-cover mb-4 rounded"
-            />
-            <div className="flex items-center mb-4">
-              <div className="flex items-center text-yellow-400 mr-2">
-                <FaStar />
-                <span className="ml-1 text-lg font-medium">
-                  {selectedProduct.rating}
-                </span>
-              </div>
-              <span className="text-gray-500 ">
-                ({Math.floor(Math.random() * 1000)} reviews)
-              </span>
-            </div>
-            <p className="text-xl font-bold mb-2 ">
-              Original Price:{" "}
-              <span className="line-through text-gray-500 ">
-                ${selectedProduct.price.toFixed(2)}
-              </span>
-            </p>
-            <p className="text-lg text-green-600  font-semibold mb-2">
-              Discount: {selectedProduct.percent}% off
-            </p>
-            <p className="text-2xl font-bold mb-4 ">
-              Final Price: $
-              {calculateDiscountedPrice(
-                selectedProduct.price,
-                selectedProduct.percent
-              ).toFixed(2)}
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => handleBuy(selectedProduct)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-300"
-              >
-                Buy Now
-              </button>
-              <button
-                onClick={closeModal}
-                className="bg-gray-200  text-gray-800  px-4 py-2 rounded hover:bg-gray-300  transition-colors duration-300"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

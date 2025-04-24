@@ -5,6 +5,7 @@ import { IoSend } from "react-icons/io5";
 import { convertDateTimeFlexibly } from "../../../utils/convertDateTimeFlexibly";
 import { RootState } from "../../../store";
 import { Message } from "../../../types/Message";
+import Loading from "../../Loading";
 interface ChatBoxProps {
   setSize: (size: number) => void;
   size: number;
@@ -13,6 +14,8 @@ interface ChatBoxProps {
   image?: string;
   setOpen: (value: null | string) => void;
   handleSendMessage: (message: string) => void;
+  isLoading: boolean;
+  setIsLoading: any;
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({
@@ -23,13 +26,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   image = "avatar.jpg",
   setOpen,
   handleSendMessage,
+  isLoading,
+  setIsLoading,
 }) => {
   const { userInfo } = useSelector((state: RootState) => state.user);
+  console.log(userInfo);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesBeginRef = useRef<HTMLDivElement | null>(null);
   const [isViewMore, setIsViewMore] = useState(false);
   const [message, setMessage] = useState("");
-
   const handleMessage = () => {
     if (!message.trim()) return;
     handleSendMessage(message);
@@ -76,40 +81,44 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
         <div className="flex-1 overflow-y-auto px-4 pt-2 pb-1">
           <div ref={messagesBeginRef}></div>
-          {messages.length === 0 ? (
+          {isLoading ? (
+            <Loading />
+          ) : messages.length === 0 ? (
             <div className="text-center">No messages</div>
-          ) : messages.length >= size ? (
-            <div
-              onClick={() => {
-                setSize(size + 7);
-                setIsViewMore(true);
-              }}
-              className="text-center text-[14px] cursor-pointer hover:underline mb-2"
-            >
-              View more
-            </div>
-          ) : null}
+          ) : (
+            <div>
+              {messages.length >= size && (
+                <div
+                  onClick={() => {
+                    setSize(size + 7);
+                    setIsViewMore(true);
+                  }}
+                  className="text-center text-[14px] cursor-pointer hover:underline mb-2"
+                >
+                  View more
+                </div>
+              )}
 
-          {messages.map((messageItem, index) => (
-            <div
-              key={index}
-              className={`flex gap-2 mt-1 ${
-                messageItem.idSend === userInfo.id
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
-            >
-              <div
-                className={`p-2 rounded-lg ${
-                  messageItem.idSend === userInfo.id
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-300"
-                }`}
-              >
-                {messageItem.message}
-              </div>
+              {messages.map(({ idSend, message }, index) => (
+                <div
+                  key={index}
+                  className={`flex gap-2 mt-1 ${
+                    idSend === userInfo.id ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`p-2 rounded-lg ${
+                      idSend === userInfo.id
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-300"
+                    }`}
+                  >
+                    {message}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
 
           <div ref={messagesEndRef}></div>
           {messages.length > 0 && (

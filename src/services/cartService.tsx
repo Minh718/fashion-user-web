@@ -8,12 +8,8 @@ const addProductToCart = async (data) => {
   await api.post(baseURL + "/cart/add", data);
 };
 const getAllProductOfCart = async (page) => {
-  try {
-    const res = await api.get(baseURL + "/cart/all?page=" + page);
-    return handleApiResponse(res);
-  } catch (e) {
-    console.log(e);
-  }
+  const res = await api.get(baseURL + "/cart/all?page=" + page);
+  return handleApiResponse(res);
 };
 
 const removeProductFromCart = async (id) => {

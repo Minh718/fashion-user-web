@@ -23,3 +23,11 @@ export const saveOrder = async (data) => {
   const res = await api.post(baseURL + "/order/save", data);
   return handleApiResponse(res).result;
 };
+export const getPaymentDetail = async (id) => {
+  const res = await api.get(baseURL + "/payment/" + id);
+  return handleApiResponse(res).result;
+};
+export const userCancelOrder = async (id) => {
+  const res = await api.get(baseURL + "/order/cancel/" + id);
+  return handleApiResponse(res);
+};

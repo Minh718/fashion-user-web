@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { searchProducts } from "../services/productService";
+import { notifyError } from "./toastNotify";
+import Loading from "./Loading";
 const dummyData = [
   {
     id: 1,
@@ -35,7 +37,7 @@ export default function FieldSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState(dummyData);
   const [size, setSize] = useState(5);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
   const handleItemClick = (item) => {
@@ -44,19 +46,22 @@ export default function FieldSearch() {
   };
 
   useEffect(() => {
+    setIsLoading(true);
+    if (searchQuery.trim() === "") {
+      setSearchResults([]);
+      setIsLoading(false);
+      return;
+    }
     const fetchData = async () => {
-      if (searchQuery.trim() === "") {
-        setSearchResults([]);
-        return;
-      }
-      setLoading(true);
+      // setIsLoading(true);
       try {
         const data = await searchProducts({ query: searchQuery });
         setSearchResults(data.result);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        notifyError("Error occured");
       } finally {
-        setLoading(false);
+        console.log("??");
+        setIsLoading(false);
       }
     };
 
@@ -88,8 +93,12 @@ export default function FieldSearch() {
         <FaSearch />
       </button>
       {searchQuery && (
-        <div className="absolute w-full mt-2 top-full max-h-[80vh] overflow-y-scroll bg-white rounded-lg shadow-lg overflow-hidden z-40">
-          {searchResults.length > 0 ? (
+        <div className="absolute min-h-7 w-full mt-2 top-full text-black max-h-[80vh] overflow-y-scroll bg-white rounded-lg shadow-lg overflow-hidden z-40">
+          {isLoading ? (
+            <div className="p-4">
+              <Loading />
+            </div>
+          ) : searchResults.length > 0 ? (
             <ul className="divide-y divide-gray-200">
               {searchResults.map((item) => (
                 <li

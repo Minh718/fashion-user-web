@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { FaStar, FaShoppingCart, FaHeart } from "react-icons/fa";
@@ -8,7 +8,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import Loading from "../../components/Loading";
 import { ProductSizeColor } from "../../types/ProductSizeColor";
 import { ProductDetails } from "../../types/ProductDetails";
-import { getProductDetail } from "../../services/productService";
+import {
+  getProductDetail,
+  getRelatedProducts,
+} from "../../services/productService";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store";
+import { notifyError, notifySuccess } from "../../components/toastNotify";
+import { setStatusCart } from "../../store/user/userSlice";
+import { addProductToCart } from "../../services/cartService";
+import LoadingBigger from "../../components/LoadingBigger";
 const links = [
   {
     name: "Home",
@@ -244,6 +253,7 @@ const ProductDetailPage = () => {
   const [productSize, setProductSize] = React.useState<ProductSize | null>(
     null
   );
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [productSizeColors, setProductSizeColors] = React.useState<
     ProductSizeColor[]
   >([]);
@@ -251,7 +261,9 @@ const ProductDetailPage = () => {
     React.useState<ProductSizeColor | null>(null);
   let { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
   const handleChangeProductSize = (item) => {
     if (item.id !== productSize?.id) {
       setProductSize({ id: item.id, size: item.size });
@@ -265,43 +277,75 @@ const ProductDetailPage = () => {
       }
     }
   };
-
+  const handleAddProductToCart = async () => {
+    if (isAuthenticated === null) {
+      navigate("/signin");
+    } else {
+      try {
+        if (productSizeColor && quantity > 0) {
+          const data = {
+            productSizeColorId: productSizeColor.id,
+            quantity: quantity,
+          };
+          await addProductToCart(data);
+          notifySuccess("Add product to cart successfully");
+          dispatch(setStatusCart(true));
+          // navigate('/cart')
+        }
+      } catch (error) {
+        notifyError(error.response.data.message);
+      }
+    }
+  };
   const handleChangeQuantity = (event) => {
     setQuantity(event.target.value);
   };
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await getProductDetail(id);
-        for (let i = 0; i < res.productSizes.length; i++) {
-          if (res.productSizes[i].quantity > 0) {
-            console.log(res.productSizes[i]);
-            setProductSize({
-              id: res.productSizes[i].id,
-              size: res.productSizes[i].size,
-            });
-            setProductSizeColors(res.productSizes[i].productSizeColors);
-            for (
-              let j = 0;
-              j < res.productSizes[i].productSizeColors.length;
-              j++
-            ) {
-              if (res.productSizes[i].productSizeColors[j].quantity > 0) {
-                setProductSizeColor(res.productSizes[i].productSizeColors[j]);
-                break;
-              }
-            }
-            break;
-          }
-        }
-        setProductDetails(product2);
-      } catch (error) {
-        navigate("/404");
-      }
-    })();
-  }, [id]);
 
-  if (productDetails === null) return <Loading />;
+  const fetchProductData = useCallback(async (id, navigate) => {
+    try {
+      const [productDetailrt, relatedProductsrt] = await Promise.all([
+        getProductDetail(id),
+        getRelatedProducts(id),
+      ]);
+      for (let i = 0; i < productDetailrt.productSizes.length; i++) {
+        if (productDetailrt.productSizes[i].quantity > 0) {
+          setProductSize({
+            id: productDetailrt.productSizes[i].id,
+            size: productDetailrt.productSizes[i].size,
+          });
+          setProductSizeColors(
+            productDetailrt.productSizes[i].productSizeColors
+          );
+          for (
+            let j = 0;
+            j < productDetailrt.productSizes[i].productSizeColors.length;
+            j++
+          ) {
+            if (
+              productDetailrt.productSizes[i].productSizeColors[j].quantity > 0
+            ) {
+              setProductSizeColor(
+                productDetailrt.productSizes[i].productSizeColors[j]
+              );
+              break;
+            }
+          }
+          break;
+        }
+      }
+      setRelatedProducts(relatedProductsrt);
+      setProductDetails(productDetailrt);
+      // Handle state updates here (assuming you have state setters)
+      // setProductDetail(productDetail);
+      // setRelatedProducts(relatedProducts);
+    } catch (error) {
+      navigate("/404");
+    }
+  }, []);
+  useEffect(() => {
+    fetchProductData(id, navigate);
+  }, [id, fetchProductData]);
+  if (productDetails === null) return <LoadingBigger />;
   const discountedPrice =
     productDetails.price * (1 - productDetails.percent / 100);
   return (
@@ -480,13 +524,13 @@ const ProductDetailPage = () => {
                           ? "border-2 bg-clip-content"
                           : ""
                       } shadow-inner p-[1px] w-[30px] h-[30px] rounded-full cursor-pointer  border-red-600`}
-                      style={{ backgroundColor: item.color.color }}
+                      style={{ backgroundColor: item.color.code }}
                     ></div>
                   ) : (
                     <div
                       key={item.id}
                       className="w-[30px] cursor-not-allowed h-[30px] rounded-full opacity-50"
-                      style={{ backgroundColor: item.color.color }}
+                      style={{ backgroundColor: item.color.code }}
                     ></div>
                   );
                 })}
@@ -527,7 +571,10 @@ const ProductDetailPage = () => {
             </div>
           </div>
           <div className="flex space-x-4 mb-8">
-            <button className="bg-blue-500 text-white px-6 py-3 rounded-md flex items-center justify-center hover:bg-blue-600 transition duration-300">
+            <button
+              onClick={handleAddProductToCart}
+              className="bg-blue-500 text-white px-6 py-3 rounded-md flex items-center justify-center hover:bg-blue-600 transition duration-300"
+            >
               <FaShoppingCart className="mr-2" />
               Add to Cart
             </button>
@@ -566,7 +613,7 @@ const ProductDetailPage = () => {
       <h3 className="text-2xl font-bold text-center">
         Products you may be interested in
       </h3>
-      <ProductsSlide products={products2} />
+      <ProductsSlide products={relatedProducts} />
     </div>
   );
 };

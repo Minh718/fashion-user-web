@@ -1,4 +1,7 @@
 import React from "react";
+import { addProductToCart } from "../../../services/cartService";
+import { notifyError } from "../../../components/toastNotify";
+import { calculateDiscountedPrice } from "../../../utils/priceDiscount";
 export default function ProductCart({
   handleRemoveProduct,
   setChoosedCpss,
@@ -18,7 +21,10 @@ export default function ProductCart({
     try {
       if (currentQuantity !== event.target.value) {
         setCurrentQuantity(event.target.value);
-        // await addProductToCart({ productSizeColorId: productSizeColor.id, quantity: event.target.value })
+        await addProductToCart({
+          productSizeColorId: productSizeColor.id,
+          quantity: event.target.value,
+        });
         if (choosedCpss.some((cps) => cps.id === id)) {
           setChoosedCpss(
             choosedCpss.map((cps) =>
@@ -29,7 +35,7 @@ export default function ProductCart({
       }
     } catch (error) {
       setCurrentQuantity(oldQuantity);
-      // notifyError(error.response.data.message)
+      notifyError(error.response.data.message);
     }
   };
   const handleCheckboxProduct = (event) => {
@@ -96,10 +102,12 @@ export default function ProductCart({
           </div>
           <div className="text-right">
             <p className="font-bold">
-              {product.price.toLocaleString("de-DE")}đ/p
+              {calculateDiscountedPrice(product.price, product.percent).toFixed(
+                2
+              )}
             </p>
             <p className="line-through opacity-70">
-              {getOriginalPrice().toLocaleString("de-DE")}đ/p
+              ${product.price.toFixed(2)}
             </p>
           </div>
         </div>

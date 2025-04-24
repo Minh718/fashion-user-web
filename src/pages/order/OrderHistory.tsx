@@ -11,8 +11,14 @@ import Pagination from "../../components/Pagination";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { statusOrder } from "../../enum/StatusOrder";
 import { Metadata } from "../../types/Metadata";
-import { fetchOrders } from "../../services/orderService";
+import { fetchOrders, userCancelOrder } from "../../services/orderService";
 import { Link } from "react-router-dom";
+import Loading from "../../components/Loading";
+import LoadingBigger from "../../components/LoadingBigger";
+import { shippingStatus } from "../../enum/shippingStatus";
+import { notifyError, notifySuccess } from "../../components/toastNotify";
+import { PaymentStatus } from "../../enum/paymentStatus";
+import { BsBank } from "react-icons/bs";
 const dummyOrders = [
   {
     id: 1,
@@ -89,8 +95,9 @@ const OrderHistory = () => {
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [page, setPage] = React.useState(0);
-  const [size, setSize] = React.useState(10);
-  const [orders, setOrders] = useState(dummyOrders);
+  const [isLoading, setIsLoading] = useState(true);
+  const [size, setSize] = React.useState(7);
+  const [orders, setOrders] = useState<any[]>([]);
   const [metadata, setMetadata] = React.useState<Metadata | null>(null);
 
   const toggleOrderExpansion = (orderId) => {
@@ -112,25 +119,31 @@ const OrderHistory = () => {
     }
   };
 
-  const handleViewDetails = (orderId) => {
-    console.log(`View details for order ${orderId}`);
-    // Implement view details functionality here
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const res = await userCancelOrder(orderId);
+      notifySuccess(res.message);
+      const newOrder = res.result;
+      setOrders(
+        orders.map((order) => (order.id === newOrder.id ? newOrder : order))
+      );
+    } catch (err) {
+      notifyError(err.response.data.message);
+    }
   };
-
-  const handleCancelOrder = (orderId) => {
-    console.log(`Cancel order ${orderId}`);
-    // Implement cancel order functionality here
-  };
+  const handleConfirmUserReceiveOrder = async (orderId) => {};
   const handleChangePage = async ({ selected }) => {
     setPage(selected);
   };
   useEffect(() => {
+    setIsLoading(true);
     (async () => {
       const res = await fetchOrders({ page, size }, filterStatus);
       setOrders(res.result);
       setMetadata(res.metadata);
+      setIsLoading(false);
     })();
-  }, [page, statusOrder]);
+  }, [page, filterStatus]);
   return (
     <div className="bg-white container mx-auto min-h-[85vh] px-4 py-8">
       <Breadcrumbs links={links} />
@@ -158,101 +171,137 @@ const OrderHistory = () => {
           ))}
         </select>
       </div>
-      <div className="space-y-4">
-        {orders.map((order) => (
-          <div
-            key={order.id}
-            className="border rounded-lg shadow-md overflow-hidden"
-          >
-            <div
-              className="flex justify-between items-center p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-              onClick={() => toggleOrderExpansion(order.id)}
-              role="button"
-              tabIndex={0}
-              aria-expanded={expandedOrder === order.id}
-              onKeyPress={(e) =>
-                e.key === "Enter" && toggleOrderExpansion(order.id)
-              }
-            >
-              <div>
-                <h2 className="text-lg font-semibold">Order #{order.id}</h2>
-                <p className="text-sm text-gray-600">{order.createdAt}</p>
-              </div>
-              <div className="flex items-center">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold mr-2 ${getStatusColor(
-                    order.orderStatus
-                  )}`}
+      <div className="space-y-4 min-h-[65vh]">
+        {isLoading ? (
+          <LoadingBigger />
+        ) : orders.length === 0 ? (
+          <div className="text-center">Order history is Empty!</div>
+        ) : (
+          <>
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="border rounded-lg shadow-md overflow-hidden"
+              >
+                <div
+                  className="flex justify-between items-center p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                  onClick={() => toggleOrderExpansion(order.id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={expandedOrder === order.id}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && toggleOrderExpansion(order.id)
+                  }
                 >
-                  {order.orderStatus}
-                </span>
-                <span className="text-lg font-bold">
-                  ${order.totalAmount.toFixed(2)}
-                </span>
-                {expandedOrder === order.id ? (
-                  <FaChevronUp className="ml-2" />
-                ) : (
-                  <FaChevronDown className="ml-2" />
-                )}
-              </div>
-            </div>
-            {expandedOrder === order.id && (
-              <div className="p-4 bg-white">
-                <div className="border-t pt-2">
-                  <h4 className="font-semibold mb-1">Shipping Information</h4>
-                  <p className="text-sm">{order.fullName}</p>
-                  <p className="text-sm">{order.shippingAddress}</p>
-                  <p className="text-sm">{order.phone}</p>
-                  <div className="flex items-center mt-2">
-                    <FaTruck className="mr-2" />
-                    <span className="text-sm">
-                      Tracking: {order.trackingNumber}
+                  <div>
+                    <h2 className="text-lg font-semibold">Order #{order.id}</h2>
+                    <p className="text-sm text-gray-600">{order.createdAt}</p>
+                  </div>
+                  <div className="flex items-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold mr-2 ${getStatusColor(
+                        order.orderStatus
+                      )}`}
+                    >
+                      {order.orderStatus}
                     </span>
+                    <span className="text-lg font-bold">
+                      ${order.totalAmount.toFixed(2)}
+                    </span>
+                    {expandedOrder === order.id ? (
+                      <FaChevronUp className="ml-2" />
+                    ) : (
+                      <FaChevronDown className="ml-2" />
+                    )}
                   </div>
                 </div>
-                <div className="mt-4">
-                  <h4 className="font-semibold mb-1">Payment Information</h4>
-                  <p className="text-sm">
-                    Method: {order.payment.paymentMethod}
-                  </p>
-                  <a
-                    href={order.urlPayment}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    View Payment Details
-                  </a>
-                </div>
-                <div className="mt-4 flex justify-end space-x-2">
-                  <Link to={`/order/${order.id}`}>
-                    <button
-                      // onClick={() => handleViewDetails(order.id)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center"
-                    >
-                      <FaEye className="mr-2" /> View Details
-                    </button>
-                  </Link>
-                  {order.orderStatus === "PENDING" && (
-                    <button
-                      onClick={() => handleCancelOrder(order.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded flex items-center"
-                    >
-                      <FaTimes className="mr-2" /> Cancel Order
-                    </button>
-                  )}
-                </div>
+
+                {expandedOrder === order.id && (
+                  <div className="p-4 bg-white">
+                    <div className="border-t pt-2">
+                      <h4 className="font-semibold mb-1">
+                        Shipping Information
+                      </h4>
+                      <p className="text-sm">{order.fullName}</p>
+                      <p className="text-sm">{order.shippingAddress}</p>
+                      <p className="text-sm">{order.phone}</p>
+                      <div className="flex items-center mt-2">
+                        <FaTruck className="mr-2" />
+                        <span className="text-sm">
+                          Tracking: {order.trackingNumber}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <h4 className="font-semibold mb-1">
+                        Payment Information
+                      </h4>
+                      <p className="text-sm">
+                        Method: {order.payment?.paymentMethod}
+                      </p>
+                      <a
+                        href={order.urlPayment}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        View Payment Details
+                      </a>
+                    </div>
+
+                    <div className="mt-4 flex justify-end space-x-2">
+                      <Link to={`/order/${order.id}`}>
+                        <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center">
+                          <FaEye className="mr-2" /> View Details
+                        </button>
+                      </Link>
+                      {order.payment?.paymentStatus === PaymentStatus.unpaid &&
+                        order.orderStatus === statusOrder.pending && (
+                          <button
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded flex items-center"
+                            onClick={() => {
+                              window.location.href = order.urlPayment;
+                            }}
+                          >
+                            <BsBank className="mr-2" /> Payment
+                          </button>
+                        )}
+                      {order.shippingStatus === shippingStatus.DELIVERED &&
+                        order.orderStatus === statusOrder.shipped && (
+                          <button
+                            onClick={() =>
+                              handleConfirmUserReceiveOrder(order.id)
+                            }
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded flex items-center"
+                          >
+                            <FaTimes className="mr-2" /> Confirm receive order
+                          </button>
+                        )}
+                      {order.shippingStatus === shippingStatus.NOT_SHIPPED && (
+                        <button
+                          onClick={() => handleCancelOrder(order.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded flex items-center"
+                        >
+                          <FaTimes className="mr-2" /> Cancel Order
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-end items-center px-4 py-2">
-        <Pagination
-          page={page}
-          pageCount={metadata?.totalPages ?? 6}
-          handlePageClick={handleChangePage}
-        />
+            ))}
+
+            {/* ✅ Pagination is outside of the loop */}
+            <div className="flex justify-end items-center px-4 py-2">
+              <Pagination
+                page={page}
+                pageCount={metadata?.totalPages ?? 6}
+                handlePageClick={handleChangePage}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
