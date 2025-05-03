@@ -93,7 +93,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <Link to="/">
             <div className="flex items-center space-x-4">
-              <img src="/public/logo.jpg" alt="Logo" className="h-14 w-auto" />
+              <img src="/logo.jpg" alt="Logo" className="h-14 w-auto" />
               <h1 className="text-2xl font-bold">ShopEase</h1>
             </div>
           </Link>
