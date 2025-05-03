@@ -102,14 +102,6 @@ const PaymentSuccessPage = () => {
         </div>
       </div>
 
-      {/* <div className="mt-8 text-center">
-        <img
-          src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-          alt="Happy shopper"
-          className="w-full max-w-md mx-auto rounded-lg shadow-lg"
-        />
-      </div> */}
-
       {showBackToTop && (
         <button
           className="fixed bottom-4 right-4 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out"

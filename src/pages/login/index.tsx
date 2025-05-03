@@ -7,11 +7,11 @@ import { oAuthGoogle } from "../../constants/oAuthGoogle";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { notifyError } from "../../components/toastNotify";
-import { isValidEmail } from "../../utils/EmailUtils";
 import { isValidPhoneNumber } from "../../utils/phoneUtils";
 import { userLogin } from "../../services/authenthicateService";
 import Cookies from "js-cookie";
 import { setUserInfo } from "../../store/user/userSlice";
+import { isValidEmail } from "../../utils/emailUtils";
 
 const Login = () => {
   const navigate = useNavigate();

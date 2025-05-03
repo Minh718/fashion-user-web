@@ -95,8 +95,8 @@ export default function InfoOrder({
   //     setWards([])
   // }, [province])
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+      <div className="w-full">
         <h1 className="text-3xl font-extrabold text-gray-900">
           Delivery Information
         </h1>
@@ -199,10 +199,11 @@ export default function InfoOrder({
         </div>
       </div>
 
-      <div className="pl-3">
+      <div className="pl-3 border-2 px-4 py-4">
         <h1 className="text-3xl font-extrabold text-gray-900">
-          Order Information
+          Order information
         </h1>
+        <hr className="my-2" />
         <div className="mb-10">
           <div className="flex justify-between items-center mt-2">
             <h1>Subtotal:</h1>
@@ -220,6 +221,7 @@ export default function InfoOrder({
             <h1>Shipping fee:</h1>
             <span className="font-bold">$0</span>
           </div>
+          <hr className="my-2" />
           <div className="flex justify-between items-center">
             <h1>Total Amount:</h1>
             <span className="font-bold">

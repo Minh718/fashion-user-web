@@ -1,60 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { FaCheckCircle, FaEdit, FaShoppingCart, FaTruck } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-// const order = {
-//   id: 1165,
-//   totalAmount: 625.36,
-//   discount: 20,
-//   shippingAddress: "So nha 80, thon thang lap 1;, Sơn Lộ, Bảo Lạc, Cao Bằng",
-//   phone: "123",
-//   fullName: "minh",
-//   urlPayment: null,
-//   orderStatus: "CONFIRMED",
-//   shippingStatus: "NOT_SHIPPED",
-//   trackingNumber: null,
-//   createdAt: "2025-04-01T03:45:44.472713",
-//   payment: {
-//     paymentMethod: "CASH_ON_DELIVERY",
-//     paymentStatus: "UNPAID",
-//   },
-//   voucher: {
-//     id: 3,
-//     code: "DK882",
-//     type: "FIXED",
-//     discount: 20,
-//   },
-//   orderProducts: [
-//     {
-//       id: 1732,
-//       quantity: 7,
-//       price: 75,
-//       image: "https://picsum.photos/200/301",
-//       name: "Soft-Touch Lightweight Flannel Shirt",
-//       size: "XXL",
-//       color: "Red",
-//     },
-//     {
-//       id: 1733,
-//       quantity: 4,
-//       price: 28,
-//       image: "https://picsum.photos/200/303",
-//       name: "Brushed Flannel Shirt",
-//       size: "XXL",
-//       color: "Light Orange",
-//     },
-//   ],
-// };
+import { formatDateWithOffset } from "../../utils/formatDateWithOffset";
 
-function formatDateWithOffset(dateStr, daysToAdd) {
-  const date = new Date(dateStr);
-  date.setDate(date.getDate() + daysToAdd);
-
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "2-digit",
-  });
-}
 const SuccessOrderPage = () => {
   const location = useLocation();
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { AiOutlineMail } from "react-icons/ai";
 import { FaPhone, FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { isValidPhoneNumber } from "../../utils/phoneUtils";
-import { isValidEmail } from "../../utils/EmailUtils";
+import { isValidEmail } from "../../utils/emailUtils";
 import { Interface } from "readline";
 import { notifyError, notifySuccess } from "../../components/toastNotify";
 import {
@@ -32,7 +32,7 @@ function isValidOTP(otp) {
   return /^\d{6}$/.test(otp);
 }
 
-const SignupForm = () => {
+const SignupPage = () => {
   const [isEmail, setIsEmail] = useState(true);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -79,7 +79,7 @@ const SignupForm = () => {
       } catch (error) {
         setIsGetCode(false);
         newErrors.phone = error.response.data.message;
-        setErrors({});
+        +setErrors(newErrors);
       }
       //API
       return;
@@ -379,4 +379,4 @@ const SignupForm = () => {
   );
 };
 
-export default SignupForm;
+export default SignupPage;

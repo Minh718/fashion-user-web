@@ -19,68 +19,6 @@ import { shippingStatus } from "../../enum/shippingStatus";
 import { notifyError, notifySuccess } from "../../components/toastNotify";
 import { PaymentStatus } from "../../enum/paymentStatus";
 import { BsBank } from "react-icons/bs";
-const dummyOrders = [
-  {
-    id: 1,
-    totalAmount: 129.99,
-    totalQuantity: 3,
-    shippingAddress: "123 Main St, Anytown, USA",
-    phone: "+1234567890",
-    fullName: "John Doe",
-    urlPayment: "https://example.com/payment/1",
-    orderStatus: "DELIVERED",
-    payment: {
-      paymentMethod: "VNPAY",
-      paymentStatus: "PAIED",
-    },
-    shippingStatus: "SHIPPED",
-    trackingNumber: "TRK123456789",
-    shippingFee: 10,
-    paymentFee: 2,
-    discount: 5,
-    createdAt: "2023-05-15",
-  },
-  {
-    id: 2,
-    totalAmount: 79.99,
-    totalQuantity: 1,
-    shippingAddress: "456 Elm St, Othertown, USA",
-    phone: "+1987654321",
-    fullName: "Jane Smith",
-    urlPayment: "https://example.com/payment/2",
-    orderStatus: "SHIPPED",
-    payment: {
-      paymentMethod: "VNPAY",
-      paymentStatus: "PAIED",
-    },
-    shippingStatus: "SHIPPED",
-    trackingNumber: "TRK987654321",
-    shippingFee: 8,
-    paymentFee: 1.5,
-    discount: 0,
-    createdAt: "2023-05-20",
-  },
-  {
-    id: 3,
-    totalAmount: 199.97,
-    totalQuantity: 3,
-    shippingAddress: "789 Oak St, Somewhere, USA",
-    phone: "+1122334455",
-    fullName: "Bob Johnson",
-    urlPayment: "https://example.com/payment/3",
-    orderStatus: "PENDING",
-    payment: {
-      paymentMethod: "VNPAY",
-      paymentStatus: "PAIED",
-    },
-    shippingStatus: "NOT_SHIPPED",
-    trackingNumber: "TRK456789123",
-    shippingFee: 12,
-    paymentFee: 3,
-    discount: 10,
-    createdAt: "2023-05-25",
-  },
-];
 const links = [
   {
     name: "Home",
@@ -206,7 +144,8 @@ const OrderHistory = () => {
                       {order.orderStatus}
                     </span>
                     <span className="text-lg font-bold">
-                      ${order.totalAmount.toFixed(2)}
+                      $
+                      {order.totalAmount ? order.totalAmount.toFixed(2) : "N/A"}
                     </span>
                     {expandedOrder === order.id ? (
                       <FaChevronUp className="ml-2" />

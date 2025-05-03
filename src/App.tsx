@@ -3,30 +3,32 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
-import Home from "./pages/index.tsx";
-import HomePage from "./pages/homePage/index.tsx";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+
+import Home from "./pages/index";
+import HomePage from "./pages/homePage/index";
 import { useDispatch, useSelector } from "react-redux";
-import ProductDetailPage from "./pages/detailProduct/index.tsx";
-import Login from "./pages/login/index.tsx";
-import Products from "./pages/productsSubcategory/index.tsx";
-import SignupForm from "./pages/register/index.tsx";
-import OrderHistory from "./pages/order/OrderHistory.tsx";
-import DetailOrderPage from "./pages/detailOrder/index.jsx";
-import ProductsCart from "./pages/cart/index.tsx";
-import PaymentSuccessPage from "./pages/paymentSuccess/index.tsx";
-import PaymentFailPage from "./pages/paymentFail/index.tsx";
-import NotFoundPage from "./pages/404/index.tsx";
+import ProductDetailPage from "./pages/detailProduct/index";
+import Login from "./pages/login/index";
+import Products from "./pages/productsSubcategory/index";
+import SignupPage from "./pages/register/index";
+import OrderHistory from "./pages/order/OrderHistory";
+import DetailOrderPage from "./pages/detailOrder/index";
+import ProductsCart from "./pages/cart/index";
+import PaymentSuccessPage from "./pages/paymentSuccess/index";
+import PaymentFailPage from "./pages/paymentFail/index";
+import NotFoundPage from "./pages/404/index";
 import { ReactNode, useCallback, useEffect } from "react";
 import { initializeUser } from "./store/user/userSlice.js";
 import React from "react";
-import Loading from "./components/Loading.tsx";
-import { getListProductsForHomePage } from "./services/productService.tsx";
-import Authenticate from "./pages/authenticate/index.tsx";
-import { AppDispatch, RootState, store } from "./store/index.tsx";
-import { getAllProductOfCart } from "./services/cartService.tsx";
-import ProfileManagement from "./pages/profile/index.tsx";
-import SuccessOrderPage from "./pages/orderSuccess/index.tsx";
-import LoadingBigger from "./components/LoadingBigger.tsx";
+import Loading from "./components/Loading";
+import { getListProductsForHomePage } from "./services/productService";
+import Authenticate from "./pages/authenticate/index";
+import { AppDispatch, RootState, store } from "./store/index";
+import { getAllProductOfCart } from "./services/cartService";
+import ProfileManagement from "./pages/profile/index";
+import SuccessOrderPage from "./pages/orderSuccess/index";
+import LoadingBigger from "./components/LoadingBigger";
 interface PrivateRouteProps {
   children: ReactNode;
 }
@@ -106,7 +108,7 @@ function App() {
         },
         {
           path: "/signup",
-          element: <SignupForm />,
+          element: <SignupPage />,
         },
         {
           path: "/product/:id",

@@ -3,7 +3,7 @@ import { FaInfoCircle, FaShoppingCart, FaStar } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { Link } from "react-router-dom";
 import { calculateDiscountedPrice } from "../../../utils/priceDiscount";
-
+import { getUrlImage } from "../../../utils/UrlImage";
 const ProductsSlide = ({ products }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(1); // Track how many items are visible
@@ -68,7 +68,7 @@ const ProductsSlide = ({ products }) => {
             >
               <div className="relative">
                 <img
-                  src={"https://picsum.photos/200/300"}
+                  src={getUrlImage(product.image)}
                   alt={product.name}
                   className="w-full h-40 object-cover"
                 />

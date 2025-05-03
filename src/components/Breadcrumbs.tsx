@@ -6,7 +6,7 @@ export default function Breadcrumbs({ links }) {
   return (
     <div className="flex items-center text-sm text-gray-600 mb-4">
       {links.map((link, index) => (
-        <React.Fragment key={link.url}>
+        <React.Fragment key={`${link.url}-${index}`}>
           <Link to={link.url} className="hover:underline">
             {link.name}
           </Link>

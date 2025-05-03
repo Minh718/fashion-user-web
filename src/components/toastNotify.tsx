@@ -26,4 +26,17 @@ const notifyError = (message) => {
     transition: Bounce,
   });
 };
-export { notifySuccess, notifyError };
+const notifyOrderSuccess = (message) => {
+  toast(message, {
+    position: "bottom-left",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+  });
+};
+export { notifySuccess, notifyError, notifyOrderSuccess };

@@ -35,7 +35,7 @@ const ProductDisplay = ({ products }) => {
           >
             <div className="relative">
               <img
-                src={"https://picsum.photos/200/300"}
+                src={product.image}
                 alt={product.name}
                 className="w-52 h-40 object-cover"
               />

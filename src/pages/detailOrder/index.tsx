@@ -9,12 +9,13 @@ import { GiCash } from "react-icons/gi";
 import { MdLocalShipping } from "react-icons/md";
 import { SiVisa } from "react-icons/si";
 import { useNavigate, useParams } from "react-router-dom";
+import Breadcrumbs from "../../components/Breadcrumbs";
 import LoadingBigger from "../../components/LoadingBigger";
 import { paymentMethod } from "../../enum/paymentMethod";
 import { TypeVoucher } from "../../enum/TypeVoucher";
 import { getDetailOrder } from "../../services/orderService";
 import ProgressIndicator from "./component/ProgressIndicator";
-import Breadcrumbs from "../../components/Breadcrumbs";
+import StarRating from "../../components/StarRating";
 const links = [
   {
     name: "Home",
@@ -61,6 +62,11 @@ const DetailOrderPage = () => {
         return <SiVisa className="text-2xl text-blue-600" />;
       default:
         return <FaCreditCard className="text-2xl text-purple-600" />;
+    }
+  };
+  const handleReviewProduct = (orderProduct) => {
+    if (!orderProduct.isRating) {
+      console.log(orderProduct.rating);
     }
   };
   useEffect(() => {
@@ -143,10 +149,7 @@ const DetailOrderPage = () => {
                     Product
                   </th>
                   <th className="py-2 px-4 font-semibold text-sm text-gray-600 border-b">
-                    Size
-                  </th>
-                  <th className="py-2 px-4 font-semibold text-sm text-gray-600 border-b">
-                    Color
+                    Review
                   </th>
                   <th className="py-2 px-4 font-semibold text-sm text-gray-600 border-b">
                     Quantity
@@ -162,9 +165,16 @@ const DetailOrderPage = () => {
                     key={product.id}
                     className="hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <td className="py-2 px-4 border-b">{product.name}</td>
-                    <td className="py-2 px-4 border-b">{product.size}</td>
-                    <td className="py-2 px-4 border-b">{product.color}</td>
+                    <td className="py-2 px-4 border-b">
+                      {product.name} ({product.size}) ({product.color})
+                    </td>
+                    <StarRating
+                      rating={5}
+                      onRatingChange={(rating) =>
+                        console.log("Selected rating:", rating)
+                      }
+                    />
+
                     <td className="py-2 px-4 border-b">{product.quantity}</td>
                     <td className="py-2 px-4 border-b">
                       ${product.price.toFixed(2)}
