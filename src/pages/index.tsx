@@ -21,7 +21,7 @@ export default function Home() {
           <div className="flex gap-2 justify-between">
             <img
               alt="avatar"
-              src={notification.picture || "/public/avatar.jpg"}
+              src={notification.picture || "/avatar.jpg"}
               className="w-[50px] h-[50px] rounded-full object-cover"
             />
             <p>{notification.message}</p>
