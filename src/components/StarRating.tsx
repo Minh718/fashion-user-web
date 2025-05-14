@@ -1,12 +1,11 @@
 import { useState } from "react";
 
-export default function StarRating({ onRatingChange, rating }) {
+export default function StarRating({ onRatingChange, product }) {
   //   const [rating, setRating] = useState(0);
 
   const handleClick = (value) => {
-    // setRating(value);
     if (onRatingChange) {
-      onRatingChange(value);
+      onRatingChange(product, value);
     }
   };
 
@@ -17,7 +16,7 @@ export default function StarRating({ onRatingChange, rating }) {
           key={star}
           onClick={() => handleClick(star)}
           xmlns="http://www.w3.org/2000/svg"
-          fill={star <= rating ? "gold" : "none"}
+          fill={star <= product.rating ? "gold" : "none"}
           viewBox="0 0 24 24"
           stroke="currentColor"
           className="w-8 h-8 cursor-pointer transition-colors duration-200"

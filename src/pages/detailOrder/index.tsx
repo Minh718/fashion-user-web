@@ -64,10 +64,17 @@ const DetailOrderPage = () => {
         return <FaCreditCard className="text-2xl text-purple-600" />;
     }
   };
-  const handleReviewProduct = (orderProduct) => {
-    if (!orderProduct.isRating) {
-      console.log(orderProduct.rating);
-    }
+  const handleReviewProduct = (orderProduct, value) => {
+    if (orderProduct.isRating) return;
+
+    setOrder((prevOrder) => ({
+      ...prevOrder,
+      orderProducts: prevOrder.orderProducts.map((product) =>
+        product.id === orderProduct.id
+          ? { ...product, isRating: true, rating: value }
+          : product
+      ),
+    }));
   };
   useEffect(() => {
     (async () => {
@@ -169,10 +176,9 @@ const DetailOrderPage = () => {
                       {product.name} ({product.size}) ({product.color})
                     </td>
                     <StarRating
-                      rating={5}
-                      onRatingChange={(rating) =>
-                        console.log("Selected rating:", rating)
-                      }
+                      // rating={product.rating}
+                      product={product}
+                      onRatingChange={handleReviewProduct}
                     />
 
                     <td className="py-2 px-4 border-b">{product.quantity}</td>
